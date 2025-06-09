@@ -1,7 +1,7 @@
 import useAuth from '../hooks/useAuth';
 
 export default function Home() {
-  const { user, login } = useAuth();
+  const { login } = useAuth();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-700 to-pink-500 flex items-center justify-center px-4 sm:hidden">
