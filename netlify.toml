@@ -6,8 +6,11 @@
 [dev]
   functions = "netlify/functions"
 
-# Scheduled draws — runs at 23:00 UTC on the last day of every month.
-# Netlify cron uses 5-field crontab; "L" isn't supported, so we run on the
-# 28th–31st and the function itself no-ops if it's not the last day.
+# Auto-draw runner — runs DAILY at 23:00 UTC. The function decides what to do:
+#   • Minimum sales already met → fire the draw "early" and email participants.
+#   • Today is the last day of the month + min met → fire the regular monthly draw.
+#   • Last day of month + min NOT met → push every active ticket's expiry forward
+#     by 1 day so they roll into the next attempt.
+#   • Otherwise → no-op.
 [functions."draw-monthly"]
-  schedule = "0 23 28-31 * *"
+  schedule = "0 23 * * *"

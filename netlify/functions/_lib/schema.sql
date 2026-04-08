@@ -20,31 +20,38 @@ CREATE TABLE IF NOT EXISTS tickets (
   is_winner   BOOLEAN NOT NULL DEFAULT FALSE,
   payment_id  TEXT,                             -- Pi paymentId (idempotency)
   txid        TEXT,
+  network     TEXT NOT NULL DEFAULT 'testnet',  -- testnet | mainnet
+  expires_at  TIMESTAMPTZ,                      -- last day of draw month, 23:00 UTC
   created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+ALTER TABLE tickets ADD COLUMN IF NOT EXISTS network    TEXT NOT NULL DEFAULT 'testnet';
+ALTER TABLE tickets ADD COLUMN IF NOT EXISTS expires_at TIMESTAMPTZ;
 CREATE INDEX IF NOT EXISTS tickets_by_user ON tickets (uid, created_at DESC);
-CREATE INDEX IF NOT EXISTS tickets_by_draw ON tickets (draw_id, status);
+CREATE INDEX IF NOT EXISTS tickets_by_draw ON tickets (draw_id, status, network);
 CREATE UNIQUE INDEX IF NOT EXISTS tickets_payment_unique ON tickets (payment_id) WHERE payment_id IS NOT NULL;
 
 CREATE TABLE IF NOT EXISTS cards (
   card_id      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   uid          TEXT NOT NULL REFERENCES users(uid) ON DELETE CASCADE,
-  seed         TEXT NOT NULL,                   -- committed at purchase, hidden until scratch
+  seed         TEXT NOT NULL,
   price_pi     NUMERIC(18, 4) NOT NULL,
-  status       TEXT NOT NULL DEFAULT 'unscratched', -- unscratched | scratched
+  status       TEXT NOT NULL DEFAULT 'unscratched',
   reward_pi    NUMERIC(18, 4),
   payment_id   TEXT,
   txid         TEXT,
+  network      TEXT NOT NULL DEFAULT 'testnet',
   scratched_at TIMESTAMPTZ,
   created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+ALTER TABLE cards ADD COLUMN IF NOT EXISTS network TEXT NOT NULL DEFAULT 'testnet';
 CREATE INDEX IF NOT EXISTS cards_by_user ON cards (uid, created_at DESC);
+CREATE INDEX IF NOT EXISTS cards_by_network ON cards (network, status);
 CREATE UNIQUE INDEX IF NOT EXISTS cards_payment_unique ON cards (payment_id) WHERE payment_id IS NOT NULL;
 
 CREATE TABLE IF NOT EXISTS draws (
   draw_id          TEXT PRIMARY KEY,
   executed_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  trigger          TEXT NOT NULL,               -- threshold | monthly | admin
+  trigger          TEXT NOT NULL,
   total_tickets    INTEGER NOT NULL,
   total_pi         NUMERIC(18, 4) NOT NULL,
   prize_pi         NUMERIC(18, 4) NOT NULL,
@@ -53,8 +60,10 @@ CREATE TABLE IF NOT EXISTS draws (
   winner_uid       TEXT REFERENCES users(uid),
   winner_username  TEXT,
   seed             TEXT NOT NULL,
-  proof_hash       TEXT NOT NULL
+  proof_hash       TEXT NOT NULL,
+  network          TEXT NOT NULL DEFAULT 'testnet'
 );
+ALTER TABLE draws ADD COLUMN IF NOT EXISTS network TEXT NOT NULL DEFAULT 'testnet';
 
 CREATE TABLE IF NOT EXISTS config (
   key        TEXT PRIMARY KEY,
@@ -62,10 +71,12 @@ CREATE TABLE IF NOT EXISTS config (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Defaults
 INSERT INTO config (key, value) VALUES
-  ('threshold_pi', '100'::jsonb),
-  ('prize_pool_ratio', '0.25'::jsonb),
-  ('ticket_price_pi', '1'::jsonb),
-  ('card_price_pi', '1'::jsonb)
+  ('ticket_price_pi',       '0.5'::jsonb),
+  ('card_price_pi',         '0.5'::jsonb),
+  ('monthly_prize_pi',      '10000'::jsonb),
+  ('card_max_payout_ratio', '0.5'::jsonb),
+  ('card_min_reward_pi',    '5'::jsonb),
+  ('card_max_reward_pi',    '1000'::jsonb),
+  ('min_sales_for_draw_pi', '0'::jsonb)
 ON CONFLICT (key) DO NOTHING;

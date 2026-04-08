@@ -29,6 +29,8 @@ export const api = {
   me:        ()                   => request('/get-user-data'),
   scratch:   (cardId)             => request('/scratch-card', { method: 'POST', body: { cardId } }),
   drawStatus:()                   => request('/draw-status'),
+  network:   ()                   => request('/network-info'),
+  updateProfile: (email)          => request('/update-profile', { method: 'POST', body: { email } }),
 
   // admin
   adminStats: (secret)         => request('/admin-stats',        { headers: adminHeaders(secret) }),

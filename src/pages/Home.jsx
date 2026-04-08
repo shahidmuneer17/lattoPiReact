@@ -36,7 +36,7 @@ export default function Home() {
 
         <div className="mt-6">
           <p className="text-xs uppercase tracking-[0.25em] opacity-80">Win this month</p>
-          <div className="text-6xl font-black animate-shimmer leading-none">25 π</div>
+          <div className="text-6xl font-black animate-shimmer leading-none">10,000 π</div>
           <p className="mt-2 text-xs opacity-90">Drawn {formatDate(cd.date)}</p>
         </div>
 
@@ -73,7 +73,7 @@ export default function Home() {
       <div>
         <h2 className="text-center text-lg font-bold mb-3">Why LattoPi?</h2>
         <div className="grid grid-cols-2 gap-3">
-          <Feature emoji="💎" title="Real Pi prize" body="Win 25 π straight to your wallet — every single month." />
+          <Feature emoji="💎" title="Real Pi prize" body="Win up to 10,000 π straight to your wallet." />
           <Feature emoji="⚡" title="Instant cards"  body="Don't want to wait? Scratch a card and win on the spot." />
           <Feature emoji="🎯" title="Provably fair" body="Every draw is cryptographically verifiable. No tricks." />
           <Feature emoji="♾️" title="No limits"     body="Buy 1 ticket or 1,000 — more entries, more chances." />
@@ -85,8 +85,8 @@ export default function Home() {
         <h2 className="text-lg font-bold mb-3">How it works</h2>
         <ol className="space-y-3 text-sm">
           <Step n="1" title="Login with Pi"   body="Authenticate with your Pi Browser account in one tap." />
-          <Step n="2" title="Buy tickets"     body="Each ticket is 1 π. Stack as many as you want — there's no cap." />
-          <Step n="3" title="Wait for the draw" body={`Drawn on ${formatDate(cd.date)}. We'll email the winner.`} />
+          <Step n="2" title="Buy tickets"     body="Each ticket is just 0.5 π. Stack as many as you want — there's no cap." />
+          <Step n="3" title="Wait for the draw" body="The draw fires once a minimum number of tickets are sold — sometimes earlier than the month-end. We'll email everyone." />
           <Step n="4" title="Or scratch & win" body="Skip the wait — open instant cards for on-the-spot rewards." />
         </ol>
       </div>

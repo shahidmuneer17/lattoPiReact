@@ -2,14 +2,15 @@ import { useEffect, useState, useCallback } from 'react';
 import { useAuthCtx } from '../AuthContext';
 import api from '../api';
 
-const QUICK_PICKS = [1, 3, 5, 10];
+const CARD_PRICE = 0.5;
+const QUICK_PICKS = [2, 5, 10, 20];
 
 export default function Cards() {
   const { user, login, pay } = useAuthCtx();
-  const [count, setCount] = useState(3);
+  const [count, setCount] = useState(5);
   const [busy, setBusy] = useState(false);
   const [cards, setCards] = useState([]);
-  const [popup, setPopup] = useState(null); // { reward }
+  const [popup, setPopup] = useState(null);
 
   const reload = useCallback(() => {
     if (!user) return;
@@ -22,8 +23,9 @@ export default function Cards() {
     if (!user) return login();
     setBusy(true);
     try {
+      const cost = +(count * CARD_PRICE).toFixed(4);
       await pay({
-        amount: count,
+        amount: cost,
         memo: `LattoPi scratch cards x${count}`,
         metadata: { kind: 'cards', count },
       });
@@ -44,12 +46,12 @@ export default function Cards() {
     }
   }
 
+  const cost = +(count * CARD_PRICE).toFixed(4);
   const unscratched = cards.filter((c) => c.status === 'unscratched');
   const scratched = cards.filter((c) => c.status === 'scratched');
 
   return (
     <section className="mt-4 space-y-5 relative">
-      {/* Win popup */}
       {popup && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/70 backdrop-blur-sm pointer-events-none">
           <div className="text-center animate-flip-in">
@@ -67,12 +69,13 @@ export default function Cards() {
         <div className="absolute -top-10 -right-10 w-40 h-40 bg-yellow-300/20 rounded-full blur-3xl animate-float" />
         <p className="chip bg-black/30 inline-block">⚡ INSTANT WIN</p>
         <h1 className="text-3xl font-black mt-2">Scratch Cards</h1>
-        <p className="text-sm opacity-90 mt-1">Reveal up to <b className="text-pi-gold">25 π</b> per card. Right now.</p>
+        <p className="text-sm opacity-90 mt-1">Reveal up to <b className="text-pi-gold">1,000 π</b> per card. Right now.</p>
       </div>
 
       {/* Buy panel */}
       <div className="glass p-5">
-        <h2 className="font-semibold text-sm mb-3">How many cards?</h2>
+        <h2 className="font-semibold text-sm mb-1">How many cards?</h2>
+        <p className="text-[11px] opacity-60 mb-3">Each card costs <b>{CARD_PRICE} π</b></p>
         <div className="grid grid-cols-4 gap-2 mb-4">
           {QUICK_PICKS.map((n) => (
             <button
@@ -89,22 +92,23 @@ export default function Cards() {
           ))}
         </div>
         <div className="flex justify-between items-center text-sm">
-          <span className="opacity-70">You pay</span>
-          <span className="font-bold text-pi-gold text-xl">{count} π</span>
+          <span className="opacity-70">{count} × {CARD_PRICE} π</span>
+          <span className="font-bold text-pi-gold text-xl">{cost} π</span>
         </div>
         <button
           onClick={buy}
           disabled={busy}
           className="btn-gold w-full mt-4 animate-pulse-glow"
         >
-          {busy ? 'Processing…' : `🎰 Pay ${count} π & Reveal`}
+          {busy ? 'Processing…' : `🎰 Pay ${cost} π & Reveal`}
         </button>
       </div>
 
-      {/* Unscratched arena */}
       {unscratched.length > 0 && (
         <div>
-          <p className="chip bg-pi-gold/20 text-pi-gold inline-block mb-3">⚡ {unscratched.length} ready to scratch</p>
+          <p className="chip bg-pi-gold/20 text-pi-gold inline-block mb-3">
+            ⚡ {unscratched.length} ready to scratch
+          </p>
           <div className="grid grid-cols-2 gap-3">
             {unscratched.map((c, i) => (
               <button
@@ -126,7 +130,6 @@ export default function Cards() {
         </div>
       )}
 
-      {/* Scratched history */}
       {scratched.length > 0 && (
         <div>
           <p className="chip bg-white/10 inline-block mb-3">🎟️ {scratched.length} revealed</p>
@@ -140,9 +143,6 @@ export default function Cards() {
                     : 'bg-white/5 border border-white/10'
                 }`}
               >
-                {c.reward_pi > 0 && (
-                  <div className="absolute -top-4 -right-4 w-16 h-16 bg-pi-gold/20 rounded-full blur-2xl" />
-                )}
                 <span className="text-[10px] uppercase opacity-70">
                   {c.reward_pi > 0 ? 'You won' : 'No win'}
                 </span>

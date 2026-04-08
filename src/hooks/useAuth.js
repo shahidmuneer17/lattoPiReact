@@ -116,5 +116,5 @@ export default function useAuth() {
     });
   }, []);
 
-  return { user, loading, error, login, logout, pay };
+  return { user, setUser, loading, error, login, logout, pay };
 }
