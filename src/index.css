@@ -115,30 +115,19 @@ body {
    `text-white` / `bg-white/10` / `border-white/10`. Rather than
    touching every component, we override those utilities globally
    when we're NOT in dark mode.
+
+   NOTE: written as flat descendant selectors (NOT CSS nesting) so
+   CRA's PostCSS pipeline can parse them without a nesting plugin.
    ────────────────────────────────────────────────────────── */
 
-html:not(.dark) {
-  /* Text — anything explicitly white becomes deep slate */
-  .text-white { color: var(--fg) !important; }
-
-  /* Surface fills — Tailwind /10 /5 /20 etc. */
-  .bg-white\/5    { background-color: var(--fill-soft)   !important; }
-  .bg-white\/10   { background-color: var(--fill-medium) !important; }
-  .bg-white\/20   { background-color: var(--fill-strong) !important; }
-
-  .border-white\/5,
-  .border-white\/10,
-  .border-white\/20 { border-color: var(--glass-border) !important; }
-
-  /* Opacity helpers — 70/80 muted text reads as fg-muted */
-  .opacity-60, .opacity-70, .opacity-80, .opacity-90 { /* leave alone */ }
-
-  /* Bottom nav and headers that lived on dark gradients */
-  .from-slate-950, .via-purple-950, .to-slate-950 { /* still ok inside .app-bg gradient */ }
-
-  /* Fix the testnet banner contrast in light mode */
-  .bg-amber-500\/90 { color: #1e293b; }
-}
+html:not(.dark) .text-white      { color: var(--fg) !important; }
+html:not(.dark) .bg-white\/5     { background-color: var(--fill-soft)   !important; }
+html:not(.dark) .bg-white\/10    { background-color: var(--fill-medium) !important; }
+html:not(.dark) .bg-white\/20    { background-color: var(--fill-strong) !important; }
+html:not(.dark) .border-white\/5,
+html:not(.dark) .border-white\/10,
+html:not(.dark) .border-white\/20 { border-color: var(--glass-border) !important; }
+html:not(.dark) .bg-amber-500\/90 { color: #1e293b; }
 
 /* ──────────────────────────────────────────────────────────
    ANIMATIONS
