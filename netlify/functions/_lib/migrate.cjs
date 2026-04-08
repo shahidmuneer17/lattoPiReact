@@ -16,22 +16,33 @@ const path = require('path');
 const { neon } = require('@neondatabase/serverless');
 
 (async () => {
-  const url = process.env.NEON_DATABASE_URL || process.env.DATABASE_URL;
+  const url =
+    process.env.NETLIFY_DATABASE_URL ||
+    process.env.NEON_DATABASE_URL ||
+    process.env.DATABASE_URL;
   if (!url) {
-    console.error('NEON_DATABASE_URL is required');
+    console.error('NETLIFY_DATABASE_URL or NEON_DATABASE_URL is required');
     process.exit(1);
   }
+  // HTTP-based client — no WebSocket polyfill needed.
+  // Calling as `sql(query, params)` runs a single statement.
   const sql = neon(url);
   const file = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
-  const stmts = file
-    .split(/;\s*$/m)
+  // Strip `-- line comments` first so the splitter doesn't treat a comment-only
+  // chunk as "skippable" and accidentally drop the CREATE TABLE that follows it.
+  const cleaned = file
+    .split('\n')
+    .map((line) => line.replace(/--.*$/, ''))
+    .join('\n');
+  const stmts = cleaned
+    .split(';')
     .map((s) => s.trim())
-    .filter((s) => s && !s.startsWith('--'));
+    .filter((s) => s.length > 0);
 
   for (const stmt of stmts) {
     process.stdout.write('▸ ' + stmt.split('\n')[0].slice(0, 80) + '… ');
     try {
-      await sql.query(stmt);
+      await sql(stmt, []);
       console.log('ok');
     } catch (e) {
       console.log('FAIL');
