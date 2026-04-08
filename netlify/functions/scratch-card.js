@@ -88,11 +88,17 @@ exports.handler = wrap(async (event) => {
     );
   }
 
+  // Winning cards enter the admin verification queue. 0π reveals stay 'none'.
+  const payoutStatus = reward > 0 ? 'verifying' : 'none';
+
   const updated = await sql`
     UPDATE cards
-    SET status = 'scratched', reward_pi = ${reward}, scratched_at = NOW()
+    SET status        = 'scratched',
+        reward_pi     = ${reward},
+        payout_status = ${payoutStatus},
+        scratched_at  = NOW()
     WHERE card_id = ${cardId}
-    RETURNING card_id, status, price_pi, reward_pi, scratched_at, created_at
+    RETURNING card_id, status, price_pi, reward_pi, payout_status, scratched_at, created_at
   `;
 
   // Referral commission for a real card win — never on a downgraded reveal.

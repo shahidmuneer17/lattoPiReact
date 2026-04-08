@@ -27,7 +27,7 @@ const CANONICAL = {
   card_max_payout_ratio:    0.5,
   card_min_reward_pi:       5,
   card_max_reward_pi:       1000,
-  min_sales_for_draw_pi:    0,
+  min_sales_for_draw_pi:    15000,
   referral_commission_rate: 0.01,
   referral_activation_pi:   10,
   referral_min_payout_pi:   5,

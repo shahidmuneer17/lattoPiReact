@@ -42,6 +42,18 @@ exports.handler = wrap(async (event) => {
     FROM users WHERE referral_activated = TRUE AND referred_by IS NOT NULL
   `;
 
+  // Pending wins awaiting admin verification.
+  const [{ pending_card_wins, pending_card_amount }] = await sql`
+    SELECT COUNT(*)::int AS pending_card_wins,
+           COALESCE(SUM(reward_pi), 0)::float AS pending_card_amount
+    FROM cards WHERE payout_status = 'verifying'
+  `;
+  const [{ pending_draws, pending_draw_amount }] = await sql`
+    SELECT COUNT(*)::int AS pending_draws,
+           COALESCE(SUM(prize_pi), 0)::float AS pending_draw_amount
+    FROM draws WHERE payout_status = 'verifying'
+  `;
+
   return ok({
     users,
     ticketsSold: tickets_sold,
@@ -54,5 +66,9 @@ exports.handler = wrap(async (event) => {
     referralPendingPayoutsPi: referral_pending,
     referralPaidTotalPi: referral_paid,
     activeReferrers: active_referrers,
+    pendingCardWins: pending_card_wins,
+    pendingCardWinsPi: pending_card_amount,
+    pendingDrawWins: pending_draws,
+    pendingDrawWinsPi: pending_draw_amount,
   });
 });

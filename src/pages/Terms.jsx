@@ -94,6 +94,9 @@ export default function Terms() {
         <ul className="list-disc pl-5 space-y-1">
           <li>The monthly draw prize is fixed at <b>10,000 π</b>, paid via Pi App-to-User (A2U) payment to the winner's verified Pi wallet.</li>
           <li>Scratch card rewards range from <b>0 π to 1,000 π</b> per card and are credited to the user's account on reveal.</li>
+          <li><b>All wins (scratch card and monthly draw) are subject to admin verification</b> before payout. Verification typically completes within <b>24–48 hours</b> of the win, though this window may extend during high volume or for additional anti-fraud checks. While verification is in progress, your win is shown in your history with a "Verifying" status.</li>
+          <li><b>After verification</b>, approved wins are credited directly to your registered Pi wallet via Pi A2U. The "Paid" status with the on-chain transaction id will appear in your history once the transfer is complete.</li>
+          <li>If a win is rejected during verification (suspected fraud, account abuse, or breach of these Terms), the user will be notified and the entry voided.</li>
           <li>
             <b>Scratch card platform safety rule:</b> at any moment, total cumulative scratch-card payouts shall
             never exceed a fixed percentage (currently 50%) of total cumulative scratch-card sales. If, at the

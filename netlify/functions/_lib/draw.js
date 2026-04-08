@@ -79,7 +79,11 @@ async function executeDraw(drawId, trigger = 'manual') {
   await sql`
     UPDATE tickets
     SET status = 'past',
-        is_winner = (ticket_id = ${winner.ticket_id})
+        is_winner = (ticket_id = ${winner.ticket_id}),
+        payout_status = CASE
+          WHEN ticket_id = ${winner.ticket_id} THEN 'verifying'
+          ELSE 'none'
+        END
     WHERE draw_id = ${drawId} AND status = 'active' AND network = ${network}
   `;
 

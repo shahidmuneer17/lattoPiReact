@@ -36,6 +36,9 @@ CREATE TABLE IF NOT EXISTS tickets (
 );
 ALTER TABLE tickets ADD COLUMN IF NOT EXISTS network    TEXT NOT NULL DEFAULT 'testnet';
 ALTER TABLE tickets ADD COLUMN IF NOT EXISTS expires_at TIMESTAMPTZ;
+-- Mirrors the draw's payout_status so the user-facing history can show
+-- "Verifying" / "Approved" / "Paid" on their winning ticket.
+ALTER TABLE tickets ADD COLUMN IF NOT EXISTS payout_status TEXT NOT NULL DEFAULT 'none';
 CREATE INDEX IF NOT EXISTS tickets_by_user ON tickets (uid, created_at DESC);
 CREATE INDEX IF NOT EXISTS tickets_by_draw ON tickets (draw_id, status, network);
 -- Multi-ticket purchases share a single payment_id so this MUST NOT be unique.
@@ -57,6 +60,17 @@ CREATE TABLE IF NOT EXISTS cards (
   created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 ALTER TABLE cards ADD COLUMN IF NOT EXISTS network TEXT NOT NULL DEFAULT 'testnet';
+-- Card win payouts go through admin verification before the user is paid.
+-- 'none'      = not a win (or not scratched yet)
+-- 'verifying' = scratched with reward > 0, awaiting admin review
+-- 'approved'  = admin approved, queued for Pi A2U send
+-- 'paid'      = Pi A2U sent, txid recorded
+-- 'rejected'  = admin rejected (suspected fraud, etc.)
+ALTER TABLE cards ADD COLUMN IF NOT EXISTS payout_status      TEXT NOT NULL DEFAULT 'none';
+ALTER TABLE cards ADD COLUMN IF NOT EXISTS payout_txid        TEXT;
+ALTER TABLE cards ADD COLUMN IF NOT EXISTS payout_resolved_at TIMESTAMPTZ;
+ALTER TABLE cards ADD COLUMN IF NOT EXISTS payout_notes       TEXT;
+CREATE INDEX IF NOT EXISTS cards_pending_payouts ON cards (payout_status) WHERE payout_status = 'verifying';
 CREATE INDEX IF NOT EXISTS cards_by_user ON cards (uid, created_at DESC);
 CREATE INDEX IF NOT EXISTS cards_by_network ON cards (network, status);
 -- See note above the tickets index — payment_id is shared across N rows.
@@ -79,6 +93,13 @@ CREATE TABLE IF NOT EXISTS draws (
   network          TEXT NOT NULL DEFAULT 'testnet'
 );
 ALTER TABLE draws ADD COLUMN IF NOT EXISTS network TEXT NOT NULL DEFAULT 'testnet';
+-- Same admin-verification flow as card wins. Default 'verifying' because
+-- every draw fired has a winner that needs to be paid.
+ALTER TABLE draws ADD COLUMN IF NOT EXISTS payout_status      TEXT NOT NULL DEFAULT 'verifying';
+ALTER TABLE draws ADD COLUMN IF NOT EXISTS payout_txid        TEXT;
+ALTER TABLE draws ADD COLUMN IF NOT EXISTS payout_resolved_at TIMESTAMPTZ;
+ALTER TABLE draws ADD COLUMN IF NOT EXISTS payout_notes       TEXT;
+CREATE INDEX IF NOT EXISTS draws_pending_payouts ON draws (payout_status) WHERE payout_status = 'verifying';
 
 CREATE TABLE IF NOT EXISTS config (
   key        TEXT PRIMARY KEY,
@@ -93,7 +114,7 @@ INSERT INTO config (key, value) VALUES
   ('card_max_payout_ratio',    '0.5'::jsonb),
   ('card_min_reward_pi',       '5'::jsonb),
   ('card_max_reward_pi',       '1000'::jsonb),
-  ('min_sales_for_draw_pi',    '0'::jsonb),
+  ('min_sales_for_draw_pi',    '15000'::jsonb),
   ('referral_commission_rate', '0.01'::jsonb),
   ('referral_activation_pi',   '10'::jsonb),
   ('referral_min_payout_pi',   '5'::jsonb)

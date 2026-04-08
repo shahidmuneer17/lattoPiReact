@@ -39,17 +39,33 @@ export const api = {
 
   // admin
   adminStats: (secret)         => request('/admin-stats',        { headers: adminHeaders(secret) }),
-  adminUsers: (secret)         => request('/admin-users',        { headers: adminHeaders(secret) }),
   adminDraw:  (secret)         => request('/admin-trigger-draw', { method: 'POST', headers: adminHeaders(secret), body: {} }),
   adminConfig:(secret)         => request('/admin-config',       { headers: adminHeaders(secret) }),
   adminSetConfig: (secret, key, value) =>
     request('/admin-config', { method: 'POST', headers: adminHeaders(secret), body: { key, value } }),
-  adminPayouts:        (secret) => request('/admin-payouts', { headers: adminHeaders(secret) }),
-  adminResolvePayout:  (secret, payoutId, status, txid, notes) =>
+
+  // paginated lists
+  adminUsers: (secret, { page = 1, pageSize = 25, q = '' } = {}) =>
+    request(`/admin-users?page=${page}&pageSize=${pageSize}&q=${encodeURIComponent(q)}`,
+      { headers: adminHeaders(secret) }),
+  adminPayouts: (secret, { page = 1, pageSize = 25, status = 'pending' } = {}) =>
+    request(`/admin-payouts?page=${page}&pageSize=${pageSize}&status=${status}`,
+      { headers: adminHeaders(secret) }),
+  adminWins: (secret, { page = 1, pageSize = 25, status = 'pending', kind = 'all' } = {}) =>
+    request(`/admin-wins?page=${page}&pageSize=${pageSize}&status=${status}&kind=${kind}`,
+      { headers: adminHeaders(secret) }),
+
+  adminResolvePayout: (secret, payoutId, status, txid, notes) =>
     request('/admin-payouts', {
       method: 'POST',
       headers: adminHeaders(secret),
       body: { payoutId, status, txid, notes },
+    }),
+  adminResolveWin: (secret, kind, id, status, txid, notes) =>
+    request('/admin-wins', {
+      method: 'POST',
+      headers: adminHeaders(secret),
+      body: { kind, id, status, txid, notes },
     }),
 };
 

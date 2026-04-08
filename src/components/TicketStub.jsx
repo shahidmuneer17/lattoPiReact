@@ -12,9 +12,17 @@ function formatExpiry(iso) {
   });
 }
 
+const PAYOUT_BADGE = {
+  verifying: { label: 'VERIFYING', cls: 'bg-amber-500 text-slate-900' },
+  approved:  { label: 'APPROVED',  cls: 'bg-emerald-500 text-slate-900' },
+  paid:      { label: 'PAID',      cls: 'bg-emerald-700 text-white' },
+  rejected:  { label: 'REJECTED',  cls: 'bg-red-600 text-white' },
+};
+
 export default function TicketStub({ ticket, index = 0 }) {
   const won = ticket.is_winner;
   const past = ticket.status === 'past';
+  const payout = won ? PAYOUT_BADGE[ticket.payout_status] : null;
   return (
     <div
       style={{ animationDelay: `${index * 50}ms` }}
@@ -35,8 +43,11 @@ export default function TicketStub({ ticket, index = 0 }) {
         <div className="flex-1 p-4 pr-6">
           <div className="flex items-center justify-between text-[10px] uppercase font-bold tracking-widest opacity-80">
             <span>LattoPi · Lottery</span>
-            {won && <span className="bg-slate-900 text-pi-gold px-1.5 py-0.5 rounded">WINNER</span>}
-            {!won && past && <span className="bg-slate-900/60 text-white px-1.5 py-0.5 rounded">PAST</span>}
+            <span className="flex gap-1">
+              {won && <span className="bg-slate-900 text-pi-gold px-1.5 py-0.5 rounded">WINNER</span>}
+              {payout && <span className={`px-1.5 py-0.5 rounded ${payout.cls}`}>{payout.label}</span>}
+              {!won && past && <span className="bg-slate-900/60 text-white px-1.5 py-0.5 rounded">PAST</span>}
+            </span>
           </div>
 
           <div className="mt-2 font-mono text-2xl font-black tracking-wider">
