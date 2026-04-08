@@ -29,7 +29,7 @@ export default function BuyTicket() {
     setMessage(null);
     const cost = +(count * TICKET_PRICE).toFixed(4);
     try {
-      const result = await pay({
+      await pay({
         amount: cost,
         memo: `LattoPi tickets x${count}`,
         metadata: { kind: 'tickets', count },
