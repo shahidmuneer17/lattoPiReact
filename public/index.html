@@ -26,8 +26,19 @@
     -->
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <script>
-      // Initialize the Pi SDK as soon as it loads. Set sandbox: false for mainnet.
-      window.Pi && window.Pi.init({ version: "2.0", sandbox: true });
+      // Auto-select sandbox vs mainnet based on hostname:
+      //   sandbox.lattopi.com  → sandbox: true   (Pi developer portal sandbox)
+      //   lattopi.com / www.*  → sandbox: false  (Pi mainnet)
+      //   anything else (localhost, *.netlify.app, deploy previews) → sandbox: true
+      (function () {
+        if (!window.Pi) return;
+        var host = window.location.hostname.toLowerCase();
+        var isMainnet = host === "lattopi.com" || host === "www.lattopi.com";
+        var sandbox = !isMainnet;
+        window.__LATTOPI_SANDBOX__ = sandbox;
+        window.Pi.init({ version: "2.0", sandbox: sandbox });
+        console.log("[Pi] init host=" + host + " sandbox=" + sandbox);
+      })();
     </script>
 
     <title>LattoPi</title>

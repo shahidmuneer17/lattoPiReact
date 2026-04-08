@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthCtx } from '../AuthContext';
+import useCountdown, { formatDate } from '../hooks/useCountdown';
 
 export default function Home() {
   const { login, loading, user, error } = useAuthCtx();
   const navigate = useNavigate();
+  const cd = useCountdown();
   const [sdkReady, setSdkReady] = useState(!!window.Pi);
 
-  // Pi SDK is async — poll briefly so the diagnostics line is accurate.
   useEffect(() => {
     if (sdkReady) return;
     const id = setInterval(() => {
@@ -21,28 +22,41 @@ export default function Home() {
   }, [user, navigate]);
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4">
-      <div className="glass p-8 w-full max-w-sm text-center">
-        <div className="text-3xl font-extrabold mb-2">🎯 LattoPi</div>
-        <p className="text-sm opacity-80 mb-6">
-          Lottery & scratch cards on the Pi Network. 75% platform / 25% prize pool.
-        </p>
+    <div className="space-y-8 mt-2 pb-8">
+      {/* ───── Hero ───── */}
+      <div className="relative overflow-hidden rounded-3xl p-7 text-center
+                      bg-gradient-to-br from-purple-700 via-fuchsia-700 to-amber-500
+                      animate-gradient shadow-2xl">
+        <div className="absolute -top-12 -right-12 w-44 h-44 bg-yellow-300/20 rounded-full blur-3xl animate-float" />
+        <div className="absolute -bottom-12 -left-12 w-44 h-44 bg-purple-300/20 rounded-full blur-3xl animate-float" />
 
-        <button onClick={login} disabled={loading} className="btn-primary w-full">
-          {loading ? 'Connecting…' : 'Login with Pi'}
+        <div className="text-5xl mb-2 animate-float">🎯</div>
+        <h1 className="text-4xl font-black tracking-tight">LattoPi</h1>
+        <p className="mt-1 text-sm opacity-90">The Pi Network's lottery & instant-win platform</p>
+
+        <div className="mt-6">
+          <p className="text-xs uppercase tracking-[0.25em] opacity-80">Win this month</p>
+          <div className="text-6xl font-black animate-shimmer leading-none">25 π</div>
+          <p className="mt-2 text-xs opacity-90">Drawn {formatDate(cd.date)}</p>
+        </div>
+
+        <button
+          onClick={login}
+          disabled={loading || !sdkReady}
+          className="mt-6 w-full btn-gold animate-pulse-glow text-base"
+        >
+          {loading ? 'Connecting…' : '🚀 Login with Pi & Play'}
         </button>
 
-        {/* Diagnostics — visible without opening devtools */}
-        <div className="mt-4 text-[11px] opacity-70 space-y-1">
-          <p>
-            Pi SDK:{' '}
-            <span className={sdkReady ? 'text-emerald-300' : 'text-red-300'}>
-              {sdkReady ? 'loaded' : 'not detected'}
-            </span>
-          </p>
+        {/* SDK status */}
+        <div className="mt-3 text-[11px] opacity-80">
+          Pi SDK:{' '}
+          <span className={sdkReady ? 'text-emerald-300' : 'text-red-300'}>
+            {sdkReady ? 'ready' : 'not detected'}
+          </span>
           {!sdkReady && (
-            <p className="text-red-300">
-              Open this page inside the <b>Pi Browser</b> app, not Chrome/Safari.
+            <p className="mt-1 text-red-200">
+              Open this in the <b>Pi Browser</b> app to play.
             </p>
           )}
         </div>
@@ -54,6 +68,69 @@ export default function Home() {
           </div>
         )}
       </div>
+
+      {/* ───── Why play ───── */}
+      <div>
+        <h2 className="text-center text-lg font-bold mb-3">Why LattoPi?</h2>
+        <div className="grid grid-cols-2 gap-3">
+          <Feature emoji="💎" title="Real Pi prize" body="Win 25 π straight to your wallet — every single month." />
+          <Feature emoji="⚡" title="Instant cards"  body="Don't want to wait? Scratch a card and win on the spot." />
+          <Feature emoji="🎯" title="Provably fair" body="Every draw is cryptographically verifiable. No tricks." />
+          <Feature emoji="♾️" title="No limits"     body="Buy 1 ticket or 1,000 — more entries, more chances." />
+        </div>
+      </div>
+
+      {/* ───── How it works ───── */}
+      <div className="glass p-5">
+        <h2 className="text-lg font-bold mb-3">How it works</h2>
+        <ol className="space-y-3 text-sm">
+          <Step n="1" title="Login with Pi"   body="Authenticate with your Pi Browser account in one tap." />
+          <Step n="2" title="Buy tickets"     body="Each ticket is 1 π. Stack as many as you want — there's no cap." />
+          <Step n="3" title="Wait for the draw" body={`Drawn on ${formatDate(cd.date)}. We'll email the winner.`} />
+          <Step n="4" title="Or scratch & win" body="Skip the wait — open instant cards for on-the-spot rewards." />
+        </ol>
+      </div>
+
+      {/* ───── Big CTA ───── */}
+      <div className="glass p-5 text-center relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-pi-purple/20 via-transparent to-pi-gold/20 animate-gradient" />
+        <div className="relative">
+          <p className="text-xs uppercase tracking-widest opacity-70">Buy more, win more</p>
+          <p className="mt-2 font-bold text-lg">More tickets = more chances at 25 π.</p>
+          <p className="text-xs opacity-80 mt-1">No max. No catch. Just more shots at the prize.</p>
+          <button
+            onClick={login}
+            disabled={loading || !sdkReady}
+            className="mt-4 btn-gold inline-block"
+          >
+            {loading ? 'Connecting…' : 'Get Started →'}
+          </button>
+        </div>
+      </div>
     </div>
+  );
+}
+
+function Feature({ emoji, title, body }) {
+  return (
+    <div className="glass p-4 animate-flip-in">
+      <div className="text-2xl">{emoji}</div>
+      <p className="font-semibold text-sm mt-1">{title}</p>
+      <p className="text-xs opacity-80 mt-1 leading-snug">{body}</p>
+    </div>
+  );
+}
+
+function Step({ n, title, body }) {
+  return (
+    <li className="flex gap-3">
+      <span className="flex-shrink-0 w-7 h-7 rounded-full bg-pi-purple/30 border border-pi-purple flex items-center justify-center text-xs font-bold">
+        {n}
+      </span>
+      <div>
+        <p className="font-semibold">{title}</p>
+        <p className="text-xs opacity-80">{body}</p>
+      </div>
+    </li>
   );
 }

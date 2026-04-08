@@ -1,48 +1,99 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthCtx } from '../AuthContext';
-import api from '../api';
+import useCountdown, { formatDate } from '../hooks/useCountdown';
 
 export default function Dashboard() {
   const { user } = useAuthCtx();
   const navigate = useNavigate();
-  const [status, setStatus] = useState({ totalPi: 0, thresholdPi: 100, ticketsCount: 0 });
+  const cd = useCountdown();
 
   useEffect(() => {
-    if (!user) { navigate('/'); return; }
-    api.drawStatus().then(setStatus).catch(() => {});
+    if (!user) navigate('/');
   }, [user, navigate]);
 
-  const pct = Math.min(100, Math.round((status.totalPi / status.thresholdPi) * 100));
-
   return (
-    <section className="space-y-5 mt-4">
-      <div className="glass p-5">
-        <p className="text-xs uppercase tracking-wider opacity-70">Progressive Threshold</p>
-        <div className="flex items-end gap-2 mt-2">
-          <span className="text-3xl font-bold">{status.totalPi}</span>
-          <span className="opacity-70 mb-1">/ {status.thresholdPi} π</span>
+    <section className="space-y-6 mt-4">
+      {/* ───── Hero: prize + countdown ───── */}
+      <div className="relative overflow-hidden rounded-3xl p-6 text-center
+                      bg-gradient-to-br from-purple-700 via-fuchsia-700 to-amber-500
+                      animate-gradient shadow-2xl">
+        <div className="absolute -top-10 -right-10 w-40 h-40 bg-yellow-300/20 rounded-full blur-3xl animate-float" />
+        <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-purple-300/20 rounded-full blur-3xl animate-float" />
+
+        <p className="text-xs uppercase tracking-[0.25em] opacity-80">This Month's Jackpot</p>
+        <h2 className="mt-2 text-6xl font-black leading-none animate-shimmer">25 π</h2>
+        <p className="mt-2 text-sm opacity-90">Guaranteed prize · One lucky winner</p>
+
+        <div className="mt-5 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-black/30 backdrop-blur">
+          <span className="w-2 h-2 rounded-full bg-pi-gold animate-pulse" />
+          <span className="text-xs">Drawn on {formatDate(cd.date)}</span>
         </div>
-        <div className="h-3 mt-3 rounded-full bg-white/10 overflow-hidden">
-          <div className="h-full bg-gradient-to-r from-pi-purple to-pi-gold transition-all"
-               style={{ width: pct + '%' }} />
+
+        <div className="mt-5 grid grid-cols-4 gap-2 max-w-xs mx-auto">
+          {[
+            ['Days', cd.days],
+            ['Hrs',  cd.hours],
+            ['Min',  cd.minutes],
+            ['Sec',  cd.seconds],
+          ].map(([label, value]) => (
+            <div key={label} className="bg-black/30 backdrop-blur rounded-xl py-2">
+              <div className="text-2xl font-bold tabular-nums">{String(value).padStart(2, '0')}</div>
+              <div className="text-[10px] uppercase opacity-70">{label}</div>
+            </div>
+          ))}
         </div>
-        <p className="text-xs opacity-60 mt-2">
-          Draw triggers automatically when threshold is reached. {status.ticketsCount} tickets in pot.
-        </p>
+
+        <Link to="/buy" className="mt-6 inline-block btn-gold animate-pulse-glow">
+          🎟️ Buy Tickets Now
+        </Link>
       </div>
 
+      {/* ───── Why play hype strip ───── */}
+      <div className="grid grid-cols-3 gap-2 text-center">
+        <div className="glass p-3">
+          <div className="text-xl">💎</div>
+          <div className="text-[10px] mt-1 opacity-80">Prize</div>
+          <div className="text-sm font-bold text-pi-gold">25 π</div>
+        </div>
+        <div className="glass p-3">
+          <div className="text-xl">⚡</div>
+          <div className="text-[10px] mt-1 opacity-80">Min entry</div>
+          <div className="text-sm font-bold">1 π / ticket</div>
+        </div>
+        <div className="glass p-3">
+          <div className="text-xl">♾️</div>
+          <div className="text-[10px] mt-1 opacity-80">Max tickets</div>
+          <div className="text-sm font-bold">Unlimited</div>
+        </div>
+      </div>
+
+      {/* ───── Buy more = win more ───── */}
+      <div className="glass p-5 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-24 h-24 bg-pi-gold/10 rounded-full blur-2xl animate-float" />
+        <p className="chip bg-pi-gold/20 text-pi-gold inline-block">🔥 Pro tip</p>
+        <h3 className="font-bold text-lg mt-2">Buy more, win more</h3>
+        <p className="text-sm opacity-80 mt-1">
+          Every ticket is one more chance at the <b className="text-pi-gold">25 π</b> jackpot.
+          Stack 10 tickets, get 10× the odds. There's no limit — go big.
+        </p>
+        <Link to="/buy" className="btn-primary inline-block mt-3">Stack tickets →</Link>
+      </div>
+
+      {/* ───── Cards section teaser ───── */}
+      <Link to="/cards" className="block glass p-5 group active:scale-[0.98] transition relative overflow-hidden">
+        <div className="absolute -right-6 -top-6 text-7xl opacity-10 group-hover:opacity-20 group-hover:rotate-12 transition">🎰</div>
+        <p className="chip bg-fuchsia-500/20 text-fuchsia-200 inline-block">⚡ Instant Win</p>
+        <h3 className="font-bold text-lg mt-2">Scratch & Win Cards</h3>
+        <p className="text-sm opacity-80 mt-1">
+          Don't want to wait for the draw? Scratch a card and win instantly.
+          Up to <b className="text-pi-gold">25 π per card</b>.
+        </p>
+        <span className="text-xs text-pi-gold mt-2 inline-block">Open scratch arena →</span>
+      </Link>
+
+      {/* ───── Roadmap teaser ───── */}
       <div className="grid grid-cols-2 gap-3">
-        <Link to="/buy" className="glass p-4 active:scale-95 transition">
-          <p className="text-xs opacity-70">Monthly Draw</p>
-          <p className="font-semibold mt-1">Buy Tickets</p>
-          <span className="text-xs text-pi-gold">Active</span>
-        </Link>
-        <Link to="/cards" className="glass p-4 active:scale-95 transition">
-          <p className="text-xs opacity-70">Instant Win</p>
-          <p className="font-semibold mt-1">Scratch Cards</p>
-          <span className="text-xs text-pi-gold">Active</span>
-        </Link>
         <div className="glass p-4 opacity-60">
           <p className="text-xs">Daily Draw</p>
           <p className="font-semibold mt-1">Coming Soon</p>
