@@ -96,7 +96,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-r from-pi-purple/20 via-transparent to-pi-gold/20 animate-gradient" />
         <div className="relative">
           <p className="text-xs uppercase tracking-widest opacity-70">Buy more, win more</p>
-          <p className="mt-2 font-bold text-lg">More tickets = more chances at 25 π.</p>
+          <p className="mt-2 font-bold text-lg">More tickets = more chances at 10,000 π.</p>
           <p className="text-xs opacity-80 mt-1">No max. No catch. Just more shots at the prize.</p>
           <button
             onClick={login}

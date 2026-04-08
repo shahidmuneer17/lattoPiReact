@@ -59,7 +59,7 @@ function Footer() {
         Latto<span className="text-pi-gold">Pi</span> · Lottery & instant-win on the Pi Network
       </p>
       <p className="opacity-80">
-        Win <b className="text-pi-gold">25 π</b> in this month's draw — provably fair, paid in Pi.
+        Win <b className="text-pi-gold">10,000 π</b> in this month's draw — provably fair, paid in Pi.
       </p>
       <nav className="flex justify-center gap-4 pt-1">
         <Link to="/privacy" className="hover:text-pi-gold">Privacy</Link>
