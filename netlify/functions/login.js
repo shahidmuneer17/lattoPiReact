@@ -2,18 +2,18 @@
 // body: { accessToken, email? }
 // Verifies the Pi access token, upserts the user in Neon, returns the row.
 const { sql } = require('./_lib/db');
-const { ok, fail, parse } = require('./_lib/response');
+const { ok, fail, parse, wrap } = require('./_lib/response');
 const { verifyAccessToken } = require('./_lib/pi');
 
-exports.handler = async (event) => {
+exports.handler = wrap(async (event) => {
   const { accessToken, email } = parse(event);
   if (!accessToken) return fail('accessToken required', 400);
 
   let me;
   try {
     me = await verifyAccessToken(accessToken);
-  } catch {
-    return fail('invalid Pi accessToken', 401);
+  } catch (e) {
+    return fail('invalid Pi accessToken: ' + e.message, 401);
   }
 
   const rows = await sql`
@@ -26,4 +26,4 @@ exports.handler = async (event) => {
     RETURNING uid, username, email, lifetime_spend_pi, created_at
   `;
   return ok({ user: rows[0] });
-};
+});

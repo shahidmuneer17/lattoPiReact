@@ -2,10 +2,10 @@
 // GET  → returns all config rows
 // POST/PUT { key, value } → upsert a config row (value can be any JSON)
 const { sql } = require('./_lib/db');
-const { ok, fail, parse } = require('./_lib/response');
+const { ok, fail, parse, wrap } = require('./_lib/response');
 const { requireAdmin } = require('./_lib/auth');
 
-exports.handler = async (event) => {
+exports.handler = wrap(async (event) => {
   if (!requireAdmin(event)) return fail('forbidden', 403);
 
   if (event.httpMethod === 'GET') {
@@ -22,4 +22,4 @@ exports.handler = async (event) => {
       SET value = EXCLUDED.value, updated_at = NOW()
   `;
   return ok({ key, value });
-};
+});

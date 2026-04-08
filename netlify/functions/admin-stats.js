@@ -1,11 +1,11 @@
 // GET /.netlify/functions/admin-stats
 // Header: X-Admin-Secret
 const { sql } = require('./_lib/db');
-const { ok, fail } = require('./_lib/response');
+const { ok, fail, wrap } = require('./_lib/response');
 const { requireAdmin } = require('./_lib/auth');
 const { getConfig } = require('./_lib/draw');
 
-exports.handler = async (event) => {
+exports.handler = wrap(async (event) => {
   if (!requireAdmin(event)) return fail('forbidden', 403);
 
   const [{ users }] = await sql`SELECT COUNT(*)::int AS users FROM users`;
@@ -33,4 +33,4 @@ exports.handler = async (event) => {
     platformSharePi: platformShare,
     cardPayoutsPi: card_payouts,
   });
-};
+});

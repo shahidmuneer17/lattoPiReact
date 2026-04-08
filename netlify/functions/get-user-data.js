@@ -2,10 +2,10 @@
 // Auth: Bearer <pi access token>
 // Returns the user record + their tickets and cards.
 const { sql } = require('./_lib/db');
-const { ok, fail } = require('./_lib/response');
+const { ok, fail, wrap } = require('./_lib/response');
 const { getPiUser } = require('./_lib/auth');
 
-exports.handler = async (event) => {
+exports.handler = wrap(async (event) => {
   const user = await getPiUser(event);
   if (!user) return fail('unauthorized', 401);
 
@@ -17,4 +17,4 @@ exports.handler = async (event) => {
   ]);
 
   return ok({ user, tickets, cards });
-};
+});

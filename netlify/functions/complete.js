@@ -8,7 +8,7 @@
 //   4. After ticket purchases, check the threshold and trigger a draw if hit.
 const crypto = require('crypto');
 const { sql } = require('./_lib/db');
-const { ok, fail, parse } = require('./_lib/response');
+const { ok, fail, parse, wrap } = require('./_lib/response');
 const { getPiUser } = require('./_lib/auth');
 const { completePayment, getPayment } = require('./_lib/pi');
 const { maybeRunThresholdDraw } = require('./_lib/draw');
@@ -41,7 +41,7 @@ function generateTicketNumber() {
   return String(Math.floor(100000 + Math.random() * 900000));
 }
 
-exports.handler = async (event) => {
+exports.handler = wrap(async (event) => {
   const user = await getPiUser(event);
   if (!user) return fail('unauthorized', 401);
 
@@ -111,6 +111,6 @@ exports.handler = async (event) => {
   }
   await sql`UPDATE users SET lifetime_spend_pi = lifetime_spend_pi + ${amount} WHERE uid = ${user.uid}`;
   return ok({ status: 'completed', kind, cards: inserted });
-};
+});
 
 exports._internal = { pickReward, REWARDS };

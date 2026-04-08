@@ -21,4 +21,22 @@ const parse = (event) => {
   }
 };
 
-module.exports = { ok, fail, parse, CORS };
+// Wraps a handler so any uncaught exception becomes a 500 with the error
+// message in the JSON body, instead of an opaque Netlify 502.
+const wrap = (handler) => async (event, context) => {
+  try {
+    return await handler(event, context);
+  } catch (e) {
+    console.error('[fn] uncaught:', e);
+    return {
+      statusCode: 500,
+      headers: { 'Content-Type': 'application/json', ...CORS },
+      body: JSON.stringify({
+        error: e.message || String(e),
+        stack: process.env.NODE_ENV === 'production' ? undefined : e.stack,
+      }),
+    };
+  }
+};
+
+module.exports = { ok, fail, parse, wrap, CORS };

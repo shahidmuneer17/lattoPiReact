@@ -4,7 +4,7 @@
 // Reveals the deterministic reward for a card the caller owns.
 const crypto = require('crypto');
 const { sql } = require('./_lib/db');
-const { ok, fail, parse } = require('./_lib/response');
+const { ok, fail, parse, wrap } = require('./_lib/response');
 const { getPiUser } = require('./_lib/auth');
 
 const REWARDS = [
@@ -27,7 +27,7 @@ function pickReward(seed) {
   return 0;
 }
 
-exports.handler = async (event) => {
+exports.handler = wrap(async (event) => {
   const user = await getPiUser(event);
   if (!user) return fail('unauthorized', 401);
 
@@ -47,4 +47,4 @@ exports.handler = async (event) => {
     RETURNING card_id, status, price_pi, reward_pi, scratched_at, created_at
   `;
   return ok({ card: updated[0] });
-};
+});
