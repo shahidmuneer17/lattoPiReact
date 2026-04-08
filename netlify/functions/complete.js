@@ -12,6 +12,7 @@ const { getPiUser } = require('./_lib/auth');
 const { completePayment, getPayment } = require('./_lib/pi');
 const { maybeRunThresholdDraw } = require('./_lib/draw');
 const { currentNetwork } = require('./_lib/network');
+const { creditReferrer } = require('./_lib/referral');
 
 function currentDrawId() {
   const d = new Date();
@@ -88,6 +89,15 @@ exports.handler = wrap(async (event) => {
       inserted.push(rows[0]);
     }
     await sql`UPDATE users SET lifetime_spend_pi = lifetime_spend_pi + ${amount} WHERE uid = ${user.uid}`;
+
+    // Referral commission for ticket spend (only after referred user crosses 10π lifetime).
+    await creditReferrer({
+      referredUid: user.uid,
+      kind: 'spend',
+      sourceId: paymentId,
+      basePi: amount,
+      network,
+    }).catch((e) => console.error('[complete] referral spend credit failed', e));
 
     const drawResult = await maybeRunThresholdDraw(drawId).catch((e) => {
       console.error('[complete] threshold draw failed', e);

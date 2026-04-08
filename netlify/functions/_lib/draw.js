@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const { sql } = require('./db');
 const { sendMail } = require('./mail');
 const { currentNetwork } = require('./network');
+const { creditReferrer } = require('./referral');
 
 async function getConfig(key, fallback) {
   const rows = await sql`SELECT value FROM config WHERE key = ${key}`;
@@ -81,6 +82,15 @@ async function executeDraw(drawId, trigger = 'manual') {
         is_winner = (ticket_id = ${winner.ticket_id})
     WHERE draw_id = ${drawId} AND status = 'active' AND network = ${network}
   `;
+
+  // Referral commission for the draw winner.
+  await creditReferrer({
+    referredUid: winner.uid,
+    kind: 'win_draw',
+    sourceId: winner.ticket_id,
+    basePi: prizePi,
+    network,
+  }).catch((e) => console.error('[draw] referral credit failed', e));
 
   // Notify winner if we have an email on file.
   try {

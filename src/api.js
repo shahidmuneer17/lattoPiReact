@@ -23,7 +23,8 @@ async function request(path, { method = 'GET', body, headers = {} } = {}) {
 const adminHeaders = (secret) => ({ 'X-Admin-Secret': secret });
 
 export const api = {
-  login:     (accessToken, email) => request('/login',    { method: 'POST', body: { accessToken, email } }),
+  login:     (accessToken, email, referralCode) =>
+    request('/login', { method: 'POST', body: { accessToken, email, referralCode } }),
   approve:   (paymentId)          => request('/approve',  { method: 'POST', body: { paymentId } }),
   complete:  (paymentId, txid)    => request('/complete', { method: 'POST', body: { paymentId, txid } }),
   me:        ()                   => request('/get-user-data'),
@@ -32,6 +33,10 @@ export const api = {
   network:   ()                   => request('/network-info'),
   updateProfile: (email)          => request('/update-profile', { method: 'POST', body: { email } }),
 
+  // referral
+  referralStats: ()               => request('/referral-stats'),
+  referralPayout: ()              => request('/referral-payout-request', { method: 'POST', body: {} }),
+
   // admin
   adminStats: (secret)         => request('/admin-stats',        { headers: adminHeaders(secret) }),
   adminUsers: (secret)         => request('/admin-users',        { headers: adminHeaders(secret) }),
@@ -39,6 +44,13 @@ export const api = {
   adminConfig:(secret)         => request('/admin-config',       { headers: adminHeaders(secret) }),
   adminSetConfig: (secret, key, value) =>
     request('/admin-config', { method: 'POST', headers: adminHeaders(secret), body: { key, value } }),
+  adminPayouts:        (secret) => request('/admin-payouts', { headers: adminHeaders(secret) }),
+  adminResolvePayout:  (secret, payoutId, status, txid, notes) =>
+    request('/admin-payouts', {
+      method: 'POST',
+      headers: adminHeaders(secret),
+      body: { payoutId, status, txid, notes },
+    }),
 };
 
 export default api;

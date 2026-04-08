@@ -122,6 +122,26 @@ export default function Terms() {
         </p>
       </Section>
 
+      <Section title="8a. Referral programme">
+        <p>
+          {LEGAL.brand} operates an optional referral programme. Each user is assigned a unique
+          referral code on first login. When you share your code with a friend and they sign in
+          using your link, you become eligible to earn commission on their activity, subject to
+          the rules below.
+        </p>
+        <ul className="list-disc pl-5 space-y-1">
+          <li><b>Activation gate:</b> commission is paid only once the referred user has spent at least <b>10 π</b> on lottery tickets in their lifetime. Until that threshold is reached, no commission is earned. Card purchases do not count toward the gate.</li>
+          <li><b>Commission rate:</b> 1% of every subsequent ticket purchase the referred user makes, AND 1% of every winning prize they receive (scratch card win or monthly draw win). Both rates may be adjusted at any time on prior notice.</li>
+          <li><b>Where commission is held:</b> earnings accumulate in a dedicated balance on your account, viewable on your Profile page. Earnings do not expire.</li>
+          <li><b>Cash-out:</b> you may request a payout of your accumulated commission once it reaches the configured minimum (currently 5 π). Payouts are processed manually within a reasonable time and paid to your verified Pi wallet.</li>
+          <li><b>Self-referral and multi-account farming are prohibited.</b> Using your own code, creating secondary accounts to refer yourself, coordinating with other users to inflate commission, or otherwise abusing the programme will result in forfeiture of all referral earnings and may lead to account suspension.</li>
+          <li><b>No commission on safety-downgraded card reveals:</b> if a scratch card reveal is capped at 0 π by the platform's solvency safety rule (Section 7), no referral commission is earned for that card.</li>
+          <li><b>Locked once set:</b> the referrer link between two users is set on first login of the referred user and cannot be changed afterwards.</li>
+          <li><b>Right to void:</b> {LEGAL.company} reserves the right to void any commission earned in breach of these rules, reject a payout request, or terminate a user's participation in the referral programme at its sole discretion.</li>
+          <li><b>Programme changes:</b> we may modify, suspend, or terminate the referral programme at any time. Accumulated balances at the moment of any change will remain payable subject to these Terms.</li>
+        </ul>
+      </Section>
+
       <Section title="9. Responsible play">
         <p>
           Lotteries and games of chance can be addictive. Only spend what you can afford to lose. If you feel

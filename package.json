@@ -27,7 +27,8 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "db:migrate": "node netlify/functions/_lib/migrate.cjs",
-    "db:wipe": "node netlify/functions/_lib/wipe.cjs"
+    "db:wipe": "node netlify/functions/_lib/wipe.cjs",
+    "db:reset-config": "node netlify/functions/_lib/reset-config.cjs"
   },
   "eslintConfig": {
     "extends": [

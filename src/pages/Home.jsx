@@ -8,8 +8,10 @@ export default function Home() {
   const navigate = useNavigate();
   const cd = useCountdown();
   const [sdkReady, setSdkReady] = useState(!!window.Pi);
+  const [pendingRef, setPendingRef] = useState(null);
 
   useEffect(() => {
+    setPendingRef(localStorage.getItem('lattopi_ref'));
     if (sdkReady) return;
     const id = setInterval(() => {
       if (window.Pi) { setSdkReady(true); clearInterval(id); }
@@ -60,6 +62,13 @@ export default function Home() {
             </p>
           )}
         </div>
+
+        {pendingRef && (
+          <div className="mt-4 text-xs bg-emerald-500/10 border border-emerald-400/30 rounded-lg p-3 text-emerald-200">
+            🎁 You've been invited by a friend! Sign in and play — once you've spent
+            10 π on tickets your friend earns 1% on every future ticket and win.
+          </div>
+        )}
 
         {error && (
           <div className="mt-4 text-left text-xs bg-red-500/10 border border-red-400/30 rounded-lg p-3 text-red-200 break-words">

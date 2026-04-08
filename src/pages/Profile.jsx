@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthCtx } from '../AuthContext';
 import api from '../api';
+import ReferralCard from '../components/ReferralCard';
 
 export default function Profile() {
   const { user, setUser, logout } = useAuthCtx();
@@ -95,6 +96,9 @@ export default function Profile() {
         </button>
         {message && <p className="text-xs mt-2 text-center">{message}</p>}
       </div>
+
+      {/* Referral programme */}
+      <ReferralCard />
 
       {/* Logout */}
       <div className="glass p-5">

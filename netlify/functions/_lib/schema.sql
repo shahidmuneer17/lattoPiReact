@@ -2,13 +2,23 @@
 -- Idempotent: safe to re-run via `npm run db:migrate`.
 
 CREATE TABLE IF NOT EXISTS users (
-  uid               TEXT PRIMARY KEY,
-  username          TEXT NOT NULL,
-  email             TEXT,
-  lifetime_spend_pi NUMERIC(18, 4) NOT NULL DEFAULT 0,
-  created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at        TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  uid                 TEXT PRIMARY KEY,
+  username            TEXT NOT NULL,
+  email               TEXT,
+  lifetime_spend_pi   NUMERIC(18, 4) NOT NULL DEFAULT 0,
+  referral_code       TEXT UNIQUE,
+  referred_by         TEXT REFERENCES users(uid),
+  referral_balance_pi NUMERIC(18, 4) NOT NULL DEFAULT 0,
+  referral_activated  BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+ALTER TABLE users ADD COLUMN IF NOT EXISTS referral_code       TEXT UNIQUE;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS referred_by         TEXT REFERENCES users(uid);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS referral_balance_pi NUMERIC(18, 4) NOT NULL DEFAULT 0;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS referral_activated  BOOLEAN NOT NULL DEFAULT FALSE;
+CREATE INDEX IF NOT EXISTS users_by_referred_by   ON users (referred_by);
+CREATE INDEX IF NOT EXISTS users_by_referral_code ON users (referral_code);
 
 CREATE TABLE IF NOT EXISTS tickets (
   ticket_id   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -72,11 +82,42 @@ CREATE TABLE IF NOT EXISTS config (
 );
 
 INSERT INTO config (key, value) VALUES
-  ('ticket_price_pi',       '0.5'::jsonb),
-  ('card_price_pi',         '0.5'::jsonb),
-  ('monthly_prize_pi',      '10000'::jsonb),
-  ('card_max_payout_ratio', '0.5'::jsonb),
-  ('card_min_reward_pi',    '5'::jsonb),
-  ('card_max_reward_pi',    '1000'::jsonb),
-  ('min_sales_for_draw_pi', '0'::jsonb)
+  ('ticket_price_pi',          '0.5'::jsonb),
+  ('card_price_pi',            '0.5'::jsonb),
+  ('monthly_prize_pi',         '10000'::jsonb),
+  ('card_max_payout_ratio',    '0.5'::jsonb),
+  ('card_min_reward_pi',       '5'::jsonb),
+  ('card_max_reward_pi',       '1000'::jsonb),
+  ('min_sales_for_draw_pi',    '0'::jsonb),
+  ('referral_commission_rate', '0.01'::jsonb),
+  ('referral_activation_pi',   '10'::jsonb),
+  ('referral_min_payout_pi',   '5'::jsonb)
 ON CONFLICT (key) DO NOTHING;
+
+CREATE TABLE IF NOT EXISTS referral_events (
+  event_id      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  referrer_uid  TEXT NOT NULL REFERENCES users(uid),
+  referred_uid  TEXT NOT NULL REFERENCES users(uid),
+  kind          TEXT NOT NULL,
+  source_id     TEXT NOT NULL,
+  base_pi       NUMERIC(18, 4) NOT NULL,
+  commission_pi NUMERIC(18, 4) NOT NULL,
+  network       TEXT NOT NULL,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS ref_events_by_referrer ON referral_events (referrer_uid, created_at DESC);
+CREATE INDEX IF NOT EXISTS ref_events_by_referred ON referral_events (referred_uid, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS referral_payouts (
+  payout_id    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  uid          TEXT NOT NULL REFERENCES users(uid),
+  amount_pi    NUMERIC(18, 4) NOT NULL,
+  status       TEXT NOT NULL DEFAULT 'pending',
+  pi_txid      TEXT,
+  notes        TEXT,
+  network      TEXT NOT NULL,
+  requested_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  resolved_at  TIMESTAMPTZ
+);
+CREATE INDEX IF NOT EXISTS ref_payouts_by_user   ON referral_payouts (uid, requested_at DESC);
+CREATE INDEX IF NOT EXISTS ref_payouts_by_status ON referral_payouts (status, requested_at);

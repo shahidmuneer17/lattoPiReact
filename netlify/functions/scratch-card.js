@@ -17,6 +17,7 @@ const { sql } = require('./_lib/db');
 const { ok, fail, parse, wrap } = require('./_lib/response');
 const { getPiUser } = require('./_lib/auth');
 const { currentNetwork } = require('./_lib/network');
+const { creditReferrer } = require('./_lib/referral');
 
 // Reward tiers within the configured min/max range. Probabilities sum to 1.
 // 88% no-win, 12% win distributed across 4 tiers (5, 25, 100, 1000 π).
@@ -93,5 +94,17 @@ exports.handler = wrap(async (event) => {
     WHERE card_id = ${cardId}
     RETURNING card_id, status, price_pi, reward_pi, scratched_at, created_at
   `;
+
+  // Referral commission for a real card win — never on a downgraded reveal.
+  if (reward > 0 && !safetyDowngrade) {
+    await creditReferrer({
+      referredUid: user.uid,
+      kind: 'win_card',
+      sourceId: cardId,
+      basePi: reward,
+      network,
+    }).catch((e) => console.error('[scratch-card] referral credit failed', e));
+  }
+
   return ok({ card: updated[0], safetyDowngrade });
 });
