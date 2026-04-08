@@ -38,7 +38,10 @@ ALTER TABLE tickets ADD COLUMN IF NOT EXISTS network    TEXT NOT NULL DEFAULT 't
 ALTER TABLE tickets ADD COLUMN IF NOT EXISTS expires_at TIMESTAMPTZ;
 CREATE INDEX IF NOT EXISTS tickets_by_user ON tickets (uid, created_at DESC);
 CREATE INDEX IF NOT EXISTS tickets_by_draw ON tickets (draw_id, status, network);
-CREATE UNIQUE INDEX IF NOT EXISTS tickets_payment_unique ON tickets (payment_id) WHERE payment_id IS NOT NULL;
+-- Multi-ticket purchases share a single payment_id so this MUST NOT be unique.
+-- Idempotency is enforced by the processed_payments table further down.
+DROP INDEX IF EXISTS tickets_payment_unique;
+CREATE INDEX IF NOT EXISTS tickets_by_payment ON tickets (payment_id) WHERE payment_id IS NOT NULL;
 
 CREATE TABLE IF NOT EXISTS cards (
   card_id      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -56,7 +59,9 @@ CREATE TABLE IF NOT EXISTS cards (
 ALTER TABLE cards ADD COLUMN IF NOT EXISTS network TEXT NOT NULL DEFAULT 'testnet';
 CREATE INDEX IF NOT EXISTS cards_by_user ON cards (uid, created_at DESC);
 CREATE INDEX IF NOT EXISTS cards_by_network ON cards (network, status);
-CREATE UNIQUE INDEX IF NOT EXISTS cards_payment_unique ON cards (payment_id) WHERE payment_id IS NOT NULL;
+-- See note above the tickets index — payment_id is shared across N rows.
+DROP INDEX IF EXISTS cards_payment_unique;
+CREATE INDEX IF NOT EXISTS cards_by_payment ON cards (payment_id) WHERE payment_id IS NOT NULL;
 
 CREATE TABLE IF NOT EXISTS draws (
   draw_id          TEXT PRIMARY KEY,
@@ -121,3 +126,19 @@ CREATE TABLE IF NOT EXISTS referral_payouts (
 );
 CREATE INDEX IF NOT EXISTS ref_payouts_by_user   ON referral_payouts (uid, requested_at DESC);
 CREATE INDEX IF NOT EXISTS ref_payouts_by_status ON referral_payouts (status, requested_at);
+
+-- Idempotency token: complete.js claims a row in here BEFORE inserting any
+-- tickets/cards. The UNIQUE PK on payment_id makes the claim atomic at the
+-- database level, so concurrent /complete calls for the same payment cannot
+-- both create rows. One row per Pi payment, ever.
+CREATE TABLE IF NOT EXISTS processed_payments (
+  payment_id   TEXT PRIMARY KEY,
+  uid          TEXT NOT NULL REFERENCES users(uid),
+  kind         TEXT NOT NULL,
+  count        INTEGER NOT NULL,
+  amount_pi    NUMERIC(18, 4) NOT NULL,
+  txid         TEXT NOT NULL,
+  network      TEXT NOT NULL,
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS processed_payments_by_user ON processed_payments (uid, created_at DESC);

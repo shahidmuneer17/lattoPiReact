@@ -116,6 +116,65 @@ export default function Home() {
           </button>
         </div>
       </div>
+
+      {/* ───── Referral programme ───── */}
+      <div className="relative overflow-hidden rounded-3xl p-6
+                      bg-gradient-to-br from-emerald-700 via-fuchsia-700 to-amber-500
+                      animate-gradient shadow-2xl">
+        <div className="absolute -top-10 -right-10 w-40 h-40 bg-yellow-300/20 rounded-full blur-3xl animate-float" />
+        <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-emerald-300/20 rounded-full blur-3xl animate-float" />
+
+        <div className="relative">
+          <div className="flex items-center gap-2">
+            <span className="chip bg-black/30">🎁 Referral Programme</span>
+            <span className="chip bg-pi-gold/30 text-pi-gold">Earn forever</span>
+          </div>
+          <h2 className="mt-3 text-2xl font-black leading-tight">
+            Invite a friend.<br />
+            Earn <span className="text-pi-gold animate-shimmer">1% forever</span>.
+          </h2>
+          <p className="mt-3 text-sm opacity-90 leading-relaxed">
+            Share your unique link. When your friend signs up and starts playing, you earn:
+          </p>
+
+          <div className="grid grid-cols-2 gap-2 mt-4">
+            <div className="bg-black/30 backdrop-blur rounded-xl p-3">
+              <div className="text-2xl">🎟️</div>
+              <p className="text-[10px] uppercase opacity-70 mt-1">Ticket spend</p>
+              <p className="text-sm font-bold">1% of every ticket</p>
+            </div>
+            <div className="bg-black/30 backdrop-blur rounded-xl p-3">
+              <div className="text-2xl">🏆</div>
+              <p className="text-[10px] uppercase opacity-70 mt-1">When they win</p>
+              <p className="text-sm font-bold">1% of every prize</p>
+            </div>
+          </div>
+
+          <div className="mt-4 bg-black/30 backdrop-blur rounded-xl p-3 text-xs opacity-90 leading-relaxed">
+            ⚡ Activated once your friend has spent <b className="text-pi-gold">10 π on tickets</b>.
+            Earnings accumulate in your wallet — cash out anytime.
+          </div>
+
+          <button
+            onClick={login}
+            disabled={loading || !sdkReady}
+            className="mt-5 w-full btn-gold animate-pulse-glow"
+          >
+            {loading ? 'Connecting…' : '🎁 Login & Get Your Link'}
+          </button>
+        </div>
+      </div>
+
+      {/* ───── How referrals work mini-flow ───── */}
+      <div className="glass p-5">
+        <h2 className="text-lg font-bold mb-3">How referrals work</h2>
+        <ol className="space-y-3 text-sm">
+          <Step n="1" title="Get your link" body="Sign in once and grab your unique LATTO-XXXXXX share link from the Profile page." />
+          <Step n="2" title="Share with friends" body="Send it on Pi chat, WhatsApp, X, anywhere. Anyone joining via your link is tagged as your referral forever." />
+          <Step n="3" title="They play, you earn" body="Once they spend 10 π on tickets, you start earning 1% on every ticket they buy AND 1% on every prize they win — automatically." />
+          <Step n="4" title="Cash out in Pi" body="When your balance reaches the minimum, hit Cash Out and we'll send the Pi straight to your wallet." />
+        </ol>
+      </div>
     </div>
   );
 }
