@@ -25,7 +25,7 @@ export default function ReferralCard() {
 
   if (error) {
     return (
-      <div className="glass p-5 text-sm text-red-200">
+      <div className="glass p-5 text-sm text-red-700 dark:text-red-200">
         Failed to load referral info: {error}
       </div>
     );
@@ -84,8 +84,8 @@ export default function ReferralCard() {
         </p>
       </div>
 
-      {/* Share link */}
-      <div className="relative bg-black/30 border border-white/10 rounded-xl p-3">
+      {/* Share link — surface-dim adapts to light/dark, no hardcoded black */}
+      <div className="relative surface-dim border border-white/10 rounded-xl p-3">
         <p className="text-[10px] uppercase opacity-60">Your share link</p>
         <p className="font-mono text-xs break-all mt-1">{data.share_url}</p>
         <div className="flex gap-2 mt-3">
@@ -101,7 +101,7 @@ export default function ReferralCard() {
       {/* Stats grid */}
       <div className="grid grid-cols-2 gap-2">
         <Stat label="Friends invited" value={data.stats.total_referrals} />
-        <Stat label="Active" value={data.stats.active_referrals} accent="text-emerald-300" />
+        <Stat label="Active" value={data.stats.active_referrals} accent="text-emerald-700 dark:text-emerald-300" />
         <Stat label="Lifetime earned" value={`${data.stats.lifetime_earned_pi.toFixed(2)} π`} accent="text-pi-gold" />
         <Stat label="Available now" value={`${data.balance_pi.toFixed(2)} π`} accent="text-pi-gold" />
       </div>

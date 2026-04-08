@@ -70,7 +70,7 @@ export default function Admin() {
           className="w-full bg-white/10 border border-white/10 rounded-xl px-4 py-3"
         />
         <button className="btn-primary w-full">Continue</button>
-        {loginError && <p className="text-xs text-red-300">{loginError}</p>}
+        {loginError && <p className="text-xs text-red-700 dark:text-red-300">{loginError}</p>}
       </form>
     );
   }
@@ -138,7 +138,7 @@ function DashboardTab({ stats, secret, onChange }) {
       <Section title="Treasury">
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           <Stat label="Total Revenue"    value={`${stats.totalRevenuePi} π`} />
-          <Stat label="Platform share"   value={`${stats.platformSharePi} π`} accent="text-emerald-300" />
+          <Stat label="Platform share"   value={`${stats.platformSharePi} π`} accent="text-emerald-700 dark:text-emerald-300" />
           <Stat label="Prize pool (legacy 25%)" value={`${stats.prizePoolPi} π`} accent="text-pi-gold" />
           <Stat label="Tickets sold"     value={stats.ticketsSold} />
           <Stat label="Cards sold"       value={stats.cardsSold} />
@@ -150,16 +150,16 @@ function DashboardTab({ stats, secret, onChange }) {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <Stat label="Pending card wins"
                 value={stats.pendingCardWins ?? 0}
-                accent="text-amber-300" />
+                accent="text-amber-700 dark:text-amber-300" />
           <Stat label="Pending card π"
                 value={`${(stats.pendingCardWinsPi ?? 0).toFixed(2)} π`}
-                accent="text-amber-300" />
+                accent="text-amber-700 dark:text-amber-300" />
           <Stat label="Pending draw wins"
                 value={stats.pendingDrawWins ?? 0}
-                accent="text-amber-300" />
+                accent="text-amber-700 dark:text-amber-300" />
           <Stat label="Pending draw π"
                 value={`${(stats.pendingDrawWinsPi ?? 0).toFixed(0)} π`}
-                accent="text-amber-300" />
+                accent="text-amber-700 dark:text-amber-300" />
         </div>
       </Section>
 
@@ -167,8 +167,8 @@ function DashboardTab({ stats, secret, onChange }) {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <Stat label="Active referrers" value={stats.activeReferrers ?? 0} />
           <Stat label="Owed (balances)"  value={`${(stats.referralBalanceOwedPi ?? 0).toFixed(2)} π`} accent="text-pi-gold" />
-          <Stat label="Pending payouts"  value={`${(stats.referralPendingPayoutsPi ?? 0).toFixed(2)} π`} accent="text-amber-300" />
-          <Stat label="Lifetime paid"    value={`${(stats.referralPaidTotalPi ?? 0).toFixed(2)} π`} accent="text-emerald-300" />
+          <Stat label="Pending payouts"  value={`${(stats.referralPendingPayoutsPi ?? 0).toFixed(2)} π`} accent="text-amber-700 dark:text-amber-300" />
+          <Stat label="Lifetime paid"    value={`${(stats.referralPaidTotalPi ?? 0).toFixed(2)} π`} accent="text-emerald-700 dark:text-emerald-300" />
         </div>
       </Section>
 
@@ -229,7 +229,7 @@ function WinsTab({ secret, onResolve }) {
   }
 
   if (!data) return <div className="opacity-60">Loading…</div>;
-  if (data.error) return <div className="text-red-300 text-sm">{data.error}</div>;
+  if (data.error) return <div className="text-red-700 dark:text-red-300 text-sm">{data.error}</div>;
 
   return (
     <div className="space-y-4">
@@ -391,7 +391,7 @@ function PayoutsTab({ secret, onResolve }) {
   }
 
   if (!data) return <div className="opacity-60">Loading…</div>;
-  if (data.error) return <div className="text-red-300 text-sm">{data.error}</div>;
+  if (data.error) return <div className="text-red-700 dark:text-red-300 text-sm">{data.error}</div>;
 
   return (
     <div className="space-y-4">
@@ -480,7 +480,7 @@ function UsersTab({ secret }) {
   }
 
   if (!data) return <div className="opacity-60">Loading…</div>;
-  if (data.error) return <div className="text-red-300 text-sm">{data.error}</div>;
+  if (data.error) return <div className="text-red-700 dark:text-red-300 text-sm">{data.error}</div>;
 
   return (
     <div className="space-y-4">
@@ -563,9 +563,9 @@ function Stat({ label, value, accent = '' }) {
 }
 
 const PILL_TONES = {
-  amber:   'bg-amber-500/20 text-amber-200 border-amber-400/30',
-  purple:  'bg-pi-purple/20 text-purple-200 border-purple-400/30',
-  emerald: 'bg-emerald-500/20 text-emerald-200 border-emerald-400/30',
+  amber:   'bg-amber-500/20 text-amber-800 dark:text-amber-200 border-amber-400/30',
+  purple:  'bg-pi-purple/20 text-purple-800 dark:text-purple-200 border-purple-400/30',
+  emerald: 'bg-emerald-500/20 text-emerald-800 dark:text-emerald-200 border-emerald-400/30',
 };
 function Pill({ label, value, tone, onClick }) {
   return (
@@ -579,11 +579,11 @@ function Pill({ label, value, tone, onClick }) {
 }
 
 const STATUS_PILL = {
-  verifying: { label: 'Verifying', cls: 'bg-amber-500/20 text-amber-200' },
-  approved:  { label: 'Approved',  cls: 'bg-emerald-500/20 text-emerald-200' },
-  paid:      { label: 'Paid',      cls: 'bg-emerald-700/30 text-emerald-200' },
-  rejected:  { label: 'Rejected',  cls: 'bg-red-500/20 text-red-200' },
-  pending:   { label: 'Pending',   cls: 'bg-amber-500/20 text-amber-200' },
+  verifying: { label: 'Verifying', cls: 'bg-amber-500/20 text-amber-800 dark:text-amber-200' },
+  approved:  { label: 'Approved',  cls: 'bg-emerald-500/20 text-emerald-800 dark:text-emerald-200' },
+  paid:      { label: 'Paid',      cls: 'bg-emerald-700/30 text-emerald-800 dark:text-emerald-200' },
+  rejected:  { label: 'Rejected',  cls: 'bg-red-500/20 text-red-700 dark:text-red-200' },
+  pending:   { label: 'Pending',   cls: 'bg-amber-500/20 text-amber-800 dark:text-amber-200' },
 };
 function StatusPill({ status }) {
   const meta = STATUS_PILL[status] || { label: status, cls: 'bg-white/10' };
@@ -600,14 +600,14 @@ function ActionButtons({ busy, onPaid, onReject }) {
       <button
         disabled={busy}
         onClick={onPaid}
-        className="px-2 py-1 rounded bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200 text-xs disabled:opacity-40"
+        className="px-2 py-1 rounded bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-800 dark:text-emerald-200 text-xs disabled:opacity-40"
       >
         ✓ Paid
       </button>
       <button
         disabled={busy}
         onClick={onReject}
-        className="px-2 py-1 rounded bg-red-500/20 hover:bg-red-500/30 text-red-200 text-xs disabled:opacity-40"
+        className="px-2 py-1 rounded bg-red-500/20 hover:bg-red-500/30 text-red-700 dark:text-red-200 text-xs disabled:opacity-40"
       >
         ✗ Reject
       </button>

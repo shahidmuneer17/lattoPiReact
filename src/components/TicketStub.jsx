@@ -33,10 +33,12 @@ export default function TicketStub({ ticket, index = 0 }) {
                       ? 'bg-gradient-to-r from-slate-300 to-slate-400 opacity-80'
                       : 'bg-gradient-to-r from-fuchsia-300 via-pi-gold to-amber-300'}`}
     >
-      {/* Notches forming the perforated edge between left/right halves */}
-      <div className="absolute top-1/2 -translate-y-1/2 left-[68%] w-3 h-3 rounded-full bg-slate-950" />
-      <div className="absolute top-0 left-[68%] -translate-x-1/2 w-3 h-1.5 rounded-b-full bg-slate-950" />
-      <div className="absolute bottom-0 left-[68%] -translate-x-1/2 w-3 h-1.5 rounded-t-full bg-slate-950" />
+      {/* Notches forming the perforated edge between left/right halves.
+          surface-page-bg matches the page backdrop in both themes so the
+          notches look like real cut-outs in the ticket. */}
+      <div className="absolute top-1/2 -translate-y-1/2 left-[68%] w-3 h-3 rounded-full surface-page-bg" />
+      <div className="absolute top-0 left-[68%] -translate-x-1/2 w-3 h-1.5 rounded-b-full surface-page-bg" />
+      <div className="absolute bottom-0 left-[68%] -translate-x-1/2 w-3 h-1.5 rounded-t-full surface-page-bg" />
 
       <div className="flex">
         {/* ── Left half: ticket info ── */}

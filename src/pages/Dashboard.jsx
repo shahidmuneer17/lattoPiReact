@@ -18,7 +18,7 @@ export default function Dashboard() {
   return (
     <section className="space-y-6 mt-4">
       {/* ───── Hero: prize + countdown ───── */}
-      <div className="relative overflow-hidden rounded-3xl p-6 text-center
+      <div className="relative overflow-hidden rounded-3xl p-6 text-center text-white
                       bg-gradient-to-br from-purple-700 via-fuchsia-700 to-amber-500
                       animate-gradient shadow-2xl">
         <div className="absolute -top-10 -right-10 w-40 h-40 bg-yellow-300/20 rounded-full blur-3xl animate-float" />
@@ -101,7 +101,7 @@ export default function Dashboard() {
       {/* ───── Cards section teaser ───── */}
       <Link to="/cards" className="block glass p-5 group active:scale-[0.98] transition relative overflow-hidden">
         <div className="absolute -right-6 -top-6 text-7xl opacity-10 group-hover:opacity-20 group-hover:rotate-12 transition">🎰</div>
-        <p className="chip bg-fuchsia-500/20 text-fuchsia-200 inline-block">⚡ Instant Win</p>
+        <p className="chip bg-fuchsia-500/20 text-fuchsia-700 dark:text-fuchsia-200 inline-block">⚡ Instant Win</p>
         <h3 className="font-bold text-lg mt-2">Scratch & Win Cards</h3>
         <p className="text-sm opacity-80 mt-1">
           Don't want to wait for the draw? Scratch a card and win instantly.

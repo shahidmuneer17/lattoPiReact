@@ -35,6 +35,13 @@
   --fill-soft:    rgba(15, 23, 42, 0.04);
   --fill-medium:  rgba(15, 23, 42, 0.07);
   --fill-strong:  rgba(15, 23, 42, 0.10);
+
+  /* Semantic surfaces — used by .surface-* classes below.
+     These replace hardcoded bg-black/30 / bg-slate-900 etc. so the same
+     class adapts to whichever theme is active. */
+  --surface-dim:  rgba(15, 23, 42, 0.06);
+  --surface-deep: rgba(15, 23, 42, 0.12);
+  --surface-page: var(--bg-start);
 }
 
 html.dark {
@@ -54,6 +61,10 @@ html.dark {
   --fill-soft:    rgba(255, 255, 255, 0.05);
   --fill-medium:  rgba(255, 255, 255, 0.10);
   --fill-strong:  rgba(255, 255, 255, 0.15);
+
+  --surface-dim:  rgba(0, 0, 0, 0.30);
+  --surface-deep: rgba(0, 0, 0, 0.50);
+  --surface-page: var(--bg-start);
 }
 
 body {
@@ -85,6 +96,15 @@ body {
   }
   .glass-hi { background: var(--glass-bg-hi); }
 
+  /* Semantic tinted surfaces — replace hardcoded bg-black/30, bg-slate-900,
+     bg-slate-950 etc. so the same element adapts to whichever theme is active.
+     surface-dim   → small badges, mini-cards inside hero gradients
+     surface-deep  → strong contrast pills (PAST badge, etc.)
+     surface-page-bg → matches the page backdrop (used by ticket-stub notches) */
+  .surface-dim     { background-color: var(--surface-dim); }
+  .surface-deep    { background-color: var(--surface-deep); }
+  .surface-page-bg { background-color: var(--surface-page); }
+
   .btn-primary {
     @apply bg-pi-purple hover:bg-purple-600 text-white font-semibold px-5 py-3 rounded-xl transition disabled:opacity-50;
   }
@@ -112,15 +132,17 @@ body {
 /* ──────────────────────────────────────────────────────────
    LIGHT-MODE UTILITY OVERRIDES
    The components were originally built dark-only with hardcoded
-   `text-white` / `bg-white/10` / `border-white/10`. Rather than
-   touching every component, we override those utilities globally
-   when we're NOT in dark mode.
+   bg-white/X and border-white/X for "frosted overlay" surfaces.
+   In light mode those become invisible, so we swap them for
+   slate-tinted equivalents using flat descendant selectors
+   (no CSS nesting → CRA's PostCSS can parse without a plugin).
 
-   NOTE: written as flat descendant selectors (NOT CSS nesting) so
-   CRA's PostCSS pipeline can parse them without a nesting plugin.
+   NOTE: we deliberately do NOT override .text-white because many
+   components use it for white-on-colored-gradient text (buttons,
+   chips on hero cards) that must stay white in BOTH themes.
+   Body text inherits from <body> which already uses var(--fg).
    ────────────────────────────────────────────────────────── */
 
-html:not(.dark) .text-white      { color: var(--fg) !important; }
 html:not(.dark) .bg-white\/5     { background-color: var(--fill-soft)   !important; }
 html:not(.dark) .bg-white\/10    { background-color: var(--fill-medium) !important; }
 html:not(.dark) .bg-white\/20    { background-color: var(--fill-strong) !important; }

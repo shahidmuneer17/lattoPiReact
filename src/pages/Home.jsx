@@ -26,7 +26,7 @@ export default function Home() {
   return (
     <div className="space-y-8 mt-2 pb-8">
       {/* ───── Hero ───── */}
-      <div className="relative overflow-hidden rounded-3xl p-7 text-center
+      <div className="relative overflow-hidden rounded-3xl p-7 text-center text-white
                       bg-gradient-to-br from-purple-700 via-fuchsia-700 to-amber-500
                       animate-gradient shadow-2xl">
         <div className="absolute -top-12 -right-12 w-44 h-44 bg-yellow-300/20 rounded-full blur-3xl animate-float" />
@@ -64,14 +64,14 @@ export default function Home() {
         </div>
 
         {pendingRef && (
-          <div className="mt-4 text-xs bg-emerald-500/10 border border-emerald-400/30 rounded-lg p-3 text-emerald-200">
+          <div className="mt-4 text-xs bg-emerald-500/10 border border-emerald-400/30 rounded-lg p-3 text-emerald-800 dark:text-emerald-200">
             🎁 You've been invited by a friend! Sign in and play — once you've spent
             10 π on tickets your friend earns 1% on every future ticket and win.
           </div>
         )}
 
         {error && (
-          <div className="mt-4 text-left text-xs bg-red-500/10 border border-red-400/30 rounded-lg p-3 text-red-200 break-words">
+          <div className="mt-4 text-left text-xs bg-red-500/10 border border-red-400/30 rounded-lg p-3 text-red-700 dark:text-red-200 break-words">
             <p className="font-semibold mb-1">Login failed</p>
             <p>{error}</p>
           </div>
@@ -118,7 +118,7 @@ export default function Home() {
       </div>
 
       {/* ───── Referral programme ───── */}
-      <div className="relative overflow-hidden rounded-3xl p-6
+      <div className="relative overflow-hidden rounded-3xl p-6 text-white
                       bg-gradient-to-br from-emerald-700 via-fuchsia-700 to-amber-500
                       animate-gradient shadow-2xl">
         <div className="absolute -top-10 -right-10 w-40 h-40 bg-yellow-300/20 rounded-full blur-3xl animate-float" />

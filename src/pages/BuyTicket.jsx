@@ -112,7 +112,7 @@ export default function BuyTicket() {
       {/* Active tickets */}
       {activeTickets.length > 0 && (
         <div id="active-tickets">
-          <p className="chip bg-emerald-500/20 text-emerald-200 inline-block mb-3">
+          <p className="chip bg-emerald-500/20 text-emerald-700 dark:text-emerald-200 inline-block mb-3">
             🎟️ {activeTickets.length} active ticket{activeTickets.length > 1 ? 's' : ''}
           </p>
           <div className="space-y-3">
@@ -125,7 +125,7 @@ export default function BuyTicket() {
 
       {/* Buy more = win more */}
       <div className="glass p-5">
-        <p className="chip bg-fuchsia-500/20 text-fuchsia-200 inline-block">🔥 Pro tip</p>
+        <p className="chip bg-fuchsia-500/20 text-fuchsia-700 dark:text-fuchsia-200 inline-block">🔥 Pro tip</p>
         <h3 className="font-bold mt-2">More tickets = more chances</h3>
         <p className="text-sm opacity-80 mt-1">
           There's no maximum. Buying 100 tickets gives you 100× the odds vs a single entry.

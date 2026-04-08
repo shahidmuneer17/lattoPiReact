@@ -4,10 +4,10 @@ import api from '../api';
 import TicketStub from '../components/TicketStub';
 
 const PAYOUT_BADGE = {
-  verifying: { label: '⏱ Verifying', cls: 'text-amber-300' },
-  approved:  { label: '✓ Approved',  cls: 'text-emerald-300' },
-  paid:      { label: '✓ Paid',      cls: 'text-emerald-200' },
-  rejected:  { label: '✗ Rejected',  cls: 'text-red-300' },
+  verifying: { label: '⏱ Verifying', cls: 'text-amber-700 dark:text-amber-300' },
+  approved:  { label: '✓ Approved',  cls: 'text-emerald-700 dark:text-emerald-300' },
+  paid:      { label: '✓ Paid',      cls: 'text-emerald-800 dark:text-emerald-200' },
+  rejected:  { label: '✗ Rejected',  cls: 'text-red-700 dark:text-red-300' },
 };
 
 export default function History() {
@@ -25,7 +25,7 @@ export default function History() {
       <div className="flex gap-2 mb-3">
         <button
           onClick={() => setTab('tickets')}
-          className={`px-4 py-2 rounded-xl text-sm ${tab === 'tickets' ? 'bg-pi-purple' : 'bg-white/10'}`}
+          className={`px-4 py-2 rounded-xl text-sm ${tab === 'tickets' ? 'bg-pi-purple text-white' : 'bg-white/10'}`}
         >
           Tickets
         </button>

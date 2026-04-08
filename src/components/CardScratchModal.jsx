@@ -124,9 +124,11 @@ export default function CardScratchModal({ card, onClose, onResolved }) {
               : 'from-rose-200 via-fuchsia-200 to-amber-200'
           }`}
         >
-          <div className="p-5 text-center">
-            <p className="chip bg-black/30 text-white inline-block mb-2">⚡ Scratch Card</p>
-            <p className="text-[10px] opacity-70 font-mono text-white/90">#{card.card_id.slice(0, 8)}</p>
+          <div className={`p-5 text-center ${isDark ? 'text-white' : 'text-slate-900'}`}>
+            <p className={`chip inline-block mb-2 ${isDark ? 'bg-black/30 text-white' : 'bg-white/60 text-slate-800'}`}>
+              ⚡ Scratch Card
+            </p>
+            <p className="text-[10px] opacity-70 font-mono">#{card.card_id.slice(0, 8)}</p>
           </div>
 
           {/* Reveal area */}
@@ -195,7 +197,7 @@ export default function CardScratchModal({ card, onClose, onResolved }) {
               </button>
             )}
             {error && (
-              <p className="text-xs text-red-300 text-center">{error}</p>
+              <p className="text-xs text-red-700 dark:text-red-300 text-center">{error}</p>
             )}
           </div>
         </div>

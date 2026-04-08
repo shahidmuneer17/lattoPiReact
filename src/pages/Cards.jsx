@@ -59,11 +59,11 @@ export default function Cards() {
       )}
 
       {/* Hero */}
-      <div className="relative overflow-hidden rounded-3xl p-6 text-center
+      <div className="relative overflow-hidden rounded-3xl p-6 text-center text-white
                       bg-gradient-to-br from-fuchsia-700 via-purple-700 to-amber-500
                       animate-gradient shadow-2xl">
         <div className="absolute -top-10 -right-10 w-40 h-40 bg-yellow-300/20 rounded-full blur-3xl animate-float" />
-        <p className="chip bg-black/30 inline-block">⚡ INSTANT WIN</p>
+        <p className="chip bg-black/30 text-white inline-block">⚡ INSTANT WIN</p>
         <h1 className="text-3xl font-black mt-2">Scratch Cards</h1>
         <p className="text-sm opacity-90 mt-1">Reveal up to <b className="text-pi-gold">1,000 π</b> per card. Right now.</p>
       </div>
