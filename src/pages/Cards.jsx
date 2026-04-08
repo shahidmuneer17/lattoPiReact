@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useAuthCtx } from '../AuthContext';
 import api from '../api';
+import CardScratchModal from '../components/CardScratchModal';
 
 const CARD_PRICE = 0.5;
 const QUICK_PICKS = [2, 5, 10, 20];
@@ -10,7 +11,7 @@ export default function Cards() {
   const [count, setCount] = useState(5);
   const [busy, setBusy] = useState(false);
   const [cards, setCards] = useState([]);
-  const [popup, setPopup] = useState(null);
+  const [openCard, setOpenCard] = useState(null);
 
   const reload = useCallback(() => {
     if (!user) return;
@@ -37,13 +38,10 @@ export default function Cards() {
     }
   }
 
-  async function reveal(card) {
-    const res = await api.scratch(card.card_id);
-    setCards((cs) => cs.map((c) => (c.card_id === card.card_id ? res.card : c)));
-    if (res.card.reward_pi > 0) {
-      setPopup({ reward: res.card.reward_pi });
-      setTimeout(() => setPopup(null), 3500);
-    }
+  // Card click → open the scratch modal. The modal owns the API call so the
+  // animation timing and response stay in sync.
+  function handleResolved(updatedCard) {
+    setCards((cs) => cs.map((c) => (c.card_id === updatedCard.card_id ? updatedCard : c)));
   }
 
   const cost = +(count * CARD_PRICE).toFixed(4);
@@ -52,14 +50,12 @@ export default function Cards() {
 
   return (
     <section className="mt-4 space-y-5 relative">
-      {popup && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/70 backdrop-blur-sm pointer-events-none">
-          <div className="text-center animate-flip-in">
-            <div className="text-6xl mb-2 animate-float">🎉</div>
-            <p className="text-xs uppercase tracking-widest opacity-80">You won</p>
-            <p className="text-7xl font-black animate-shimmer">{popup.reward} π</p>
-          </div>
-        </div>
+      {openCard && (
+        <CardScratchModal
+          card={openCard}
+          onClose={() => setOpenCard(null)}
+          onResolved={handleResolved}
+        />
       )}
 
       {/* Hero */}
@@ -113,15 +109,15 @@ export default function Cards() {
             {unscratched.map((c, i) => (
               <button
                 key={c.card_id}
-                onClick={() => reveal(c)}
+                onClick={() => setOpenCard(c)}
                 style={{ animationDelay: `${i * 60}ms` }}
                 className="aspect-square rounded-2xl relative overflow-hidden group active:scale-95 transition animate-flip-in"
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-purple-600 via-fuchsia-600 to-amber-500 animate-gradient" />
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
                   <div className="text-4xl mb-1 animate-float">🎁</div>
-                  <span className="font-bold tracking-wider text-sm">SCRATCH</span>
-                  <span className="text-[10px] opacity-80 mt-1">tap to reveal</span>
+                  <span className="font-bold tracking-wider text-sm">OPEN CARD</span>
+                  <span className="text-[10px] opacity-80 mt-1">tap to scratch</span>
                 </div>
                 <div className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition" />
               </button>

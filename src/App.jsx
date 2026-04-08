@@ -1,6 +1,7 @@
 // src/App.jsx
 import { BrowserRouter as Router, Routes, Route, NavLink, Link } from 'react-router-dom';
 import { AuthProvider, useAuthCtx } from './AuthContext';
+import { ThemeProvider, useTheme } from './ThemeContext';
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import BuyTicket from './pages/BuyTicket';
@@ -17,23 +18,26 @@ import LEGAL from './config/legal';
 function Shell({ children }) {
   const { user } = useAuthCtx();
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 text-white">
+    <div className="min-h-screen flex flex-col app-bg">
       <TestnetBanner />
       <header className="px-5 py-4 flex items-center justify-between">
         <Link to="/" className="text-xl font-bold tracking-wide">
           Latto<span className="text-pi-gold">Pi</span>
         </Link>
-        {user && (
-          <Link
-            to="/profile"
-            className="flex items-center gap-2 text-xs hover:opacity-80"
-          >
-            <span className="w-7 h-7 rounded-full bg-gradient-to-br from-pi-purple to-pi-gold flex items-center justify-center font-bold text-sm">
-              {user.username?.[0]?.toUpperCase() || 'π'}
-            </span>
-            <span>@{user.username}</span>
-          </Link>
-        )}
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+          {user && (
+            <Link
+              to="/profile"
+              className="flex items-center gap-2 text-xs hover:opacity-80"
+            >
+              <span className="w-7 h-7 rounded-full bg-gradient-to-br from-pi-purple to-pi-gold flex items-center justify-center font-bold text-sm">
+                {user.username?.[0]?.toUpperCase() || 'π'}
+              </span>
+              <span>@{user.username}</span>
+            </Link>
+          )}
+        </div>
       </header>
 
       <main className="flex-1 px-5 pb-32">{children}</main>
@@ -49,6 +53,21 @@ function Shell({ children }) {
         </nav>
       )}
     </div>
+  );
+}
+
+// Tiny sun/moon toggle used in the header.
+function ThemeToggle() {
+  const { isDark, toggle } = useTheme();
+  return (
+    <button
+      onClick={toggle}
+      aria-label="Toggle theme"
+      className="w-9 h-9 rounded-full glass flex items-center justify-center text-base hover:scale-105 transition"
+      title={isDark ? 'Switch to light' : 'Switch to dark'}
+    >
+      {isDark ? '☀️' : '🌙'}
+    </button>
   );
 }
 
@@ -78,8 +97,9 @@ function Footer() {
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
+    <ThemeProvider>
+      <AuthProvider>
+        <Router>
         <Shell>
           <Routes>
             <Route path="/" element={<Home />} />
@@ -93,9 +113,10 @@ function App() {
             <Route path="/terms" element={<Terms />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </Shell>
-      </Router>
-    </AuthProvider>
+          </Shell>
+        </Router>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 
