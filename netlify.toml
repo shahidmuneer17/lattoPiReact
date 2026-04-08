@@ -6,6 +6,14 @@
 [dev]
   functions = "netlify/functions"
 
+# SPA fallback — every non-file, non-function URL serves index.html so
+# React Router can handle the route client-side. Without this, hitting
+# /admin or /privacy directly (or refreshing them) returns 404.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
 # Auto-draw runner — runs DAILY at 23:00 UTC. The function decides what to do:
 #   • Minimum sales already met → fire the draw "early" and email participants.
 #   • Today is the last day of the month + min met → fire the regular monthly draw.
