@@ -1,31 +1,20 @@
-const { MongoClient } = require('mongodb');
+// GET /.netlify/functions/get-user-data
+// Auth: Bearer <pi access token>
+// Returns the user record + their tickets and cards.
+const { sql } = require('./_lib/db');
+const { ok, fail } = require('./_lib/response');
+const { getPiUser } = require('./_lib/auth');
 
-const client = new MongoClient(process.env.MONGODB_URI);
-const dbName = 'pi_lottery';
+exports.handler = async (event) => {
+  const user = await getPiUser(event);
+  if (!user) return fail('unauthorized', 401);
 
-exports.handler = async function(event, context) {
-  const { uid } = JSON.parse(event.body || '{}');
+  const [tickets, cards] = await Promise.all([
+    sql`SELECT ticket_id, draw_id, number, price_pi, status, is_winner, created_at
+        FROM tickets WHERE uid = ${user.uid} ORDER BY created_at DESC LIMIT 200`,
+    sql`SELECT card_id, status, price_pi, reward_pi, scratched_at, created_at
+        FROM cards   WHERE uid = ${user.uid} ORDER BY created_at DESC LIMIT 200`,
+  ]);
 
-  if (!uid) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ error: 'Missing UID' }),
-    };
-  }
-
-  try {
-    await client.connect();
-    const db = client.db(dbName);
-    const user = await db.collection('users').findOne({ uid });
-
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ user }),
-    };
-  } catch (error) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: error.message }),
-    };
-  }
+  return ok({ user, tickets, cards });
 };

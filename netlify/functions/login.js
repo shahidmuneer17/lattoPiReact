@@ -1,26 +1,29 @@
-const { MongoClient } = require('mongodb');
+// POST /.netlify/functions/login
+// body: { accessToken, email? }
+// Verifies the Pi access token, upserts the user in Neon, returns the row.
+const { sql } = require('./_lib/db');
+const { ok, fail, parse } = require('./_lib/response');
+const { verifyAccessToken } = require('./_lib/pi');
 
 exports.handler = async (event) => {
-  const body = JSON.parse(event.body);
-  const { uid, username } = body;
+  const { accessToken, email } = parse(event);
+  if (!accessToken) return fail('accessToken required', 400);
 
-  const client = new MongoClient(process.env.MONGODB_URI);
-  await client.connect();
-  const db = client.db('pi_lottery');
-  const users = db.collection('users');
-
-  const existingUser = await users.findOne({ uid });
-
-  if (!existingUser) {
-    await users.insertOne({
-      uid,
-      username,
-      createdAt: new Date(),
-    });
+  let me;
+  try {
+    me = await verifyAccessToken(accessToken);
+  } catch {
+    return fail('invalid Pi accessToken', 401);
   }
 
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ uid, username }),
-  };
+  const rows = await sql`
+    INSERT INTO users (uid, username, email, updated_at)
+    VALUES (${me.uid}, ${me.username}, ${email || null}, NOW())
+    ON CONFLICT (uid) DO UPDATE
+      SET username = EXCLUDED.username,
+          email = COALESCE(EXCLUDED.email, users.email),
+          updated_at = NOW()
+    RETURNING uid, username, email, lifetime_spend_pi, created_at
+  `;
+  return ok({ user: rows[0] });
 };

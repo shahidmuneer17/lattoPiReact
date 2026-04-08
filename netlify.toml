@@ -1,6 +1,13 @@
 [build]
   functions = "netlify/functions"
   publish = "build"
+  command = "npm run build"
 
 [dev]
   functions = "netlify/functions"
+
+# Scheduled draws — runs at 23:00 UTC on the last day of every month.
+# Netlify cron uses 5-field crontab; "L" isn't supported, so we run on the
+# 28th–31st and the function itself no-ops if it's not the last day.
+[functions."draw-monthly"]
+  schedule = "0 23 28-31 * *"

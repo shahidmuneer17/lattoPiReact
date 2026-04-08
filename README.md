@@ -1,70 +1,85 @@
-# Getting Started with Create React App
+# LattoPi
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Lottery + scratch-card platform for the Pi Network.
+**Stack:** React (CRA) · Tailwind · Netlify Functions · Neon (Postgres) · Pi SDK · Maileroo
+**Business logic:** 75% platform / 25% prize pool. 100% of Pi flows to the developer-registered Pi Wallet.
 
-## Available Scripts
+## Repo layout
 
-In the project directory, you can run:
+```
+lattoPiReact/
+  src/                React app (Pi Browser, mobile-first)
+    pages/            Home · Dashboard · BuyTicket · Cards · History · Admin
+    hooks/useAuth.js  Pi auth + payment flow
+    api.js            Fetch wrapper for Netlify Functions
+    AuthContext.jsx   Shared auth state
+  netlify/functions/
+    _lib/             db (Neon), pi, auth, response, mail, draw, schema.sql, migrate.cjs
+    login.js                 POST  Pi auth → upsert user
+    approve.js               POST  Pi server-side approve
+    complete.js              POST  Pi server-side complete + create tickets/cards (idempotent)
+    get-user-data.js         GET   user profile + tickets + cards
+    scratch-card.js          POST  reveal a card (deterministic)
+    draw-status.js           GET   public progressive-bar data
+    draw-monthly.js          CRON  monthly draw (scheduled in netlify.toml)
+    admin-stats.js           GET   treasury stats (X-Admin-Secret)
+    admin-users.js           GET   user list
+    admin-trigger-draw.js    POST  manual draw
+    admin-config.js          GET/PUT thresholds and prices
+  netlify.toml          functions dir + monthly cron
+  tailwind.config.js
+```
 
-### `npm start`
+## Setup
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+1. **Neon** — create a project at neon.tech, copy the pooled connection string.
+2. **Pi Developer Portal** — register the app, get `PI_API_KEY`. Add the deployed URL to allowed origins.
+3. `cp .env.example .env` and fill in `NEON_DATABASE_URL`, `PI_API_KEY`, `ADMIN_SECRET`, optional `MAILEROO_API_KEY`.
+4. `npm install`
+5. `npm run db:migrate` — creates/updates the Neon schema (idempotent).
+6. `npm start` — runs CRA on http://localhost:3000
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+For full-stack local dev with the functions running:
+```
+npm i -g netlify-cli
+netlify dev
+```
 
-### `npm test`
+## Deploying to Netlify
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+1. `netlify init` (or connect the repo in the Netlify dashboard).
+2. Set the same env vars (`NEON_DATABASE_URL`, `PI_API_KEY`, `ADMIN_SECRET`, `MAILEROO_API_KEY`) in
+   **Site → Environment variables**.
+3. Push to your branch — Netlify will build and deploy `build/` and the functions in `netlify/functions/`.
+4. The monthly draw cron is registered automatically from `netlify.toml`.
+5. Before going to mainnet, switch `Pi.init({ sandbox: false })` in [public/index.html](public/index.html).
 
-### `npm run build`
+## Pi payment flow
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```
+React  ─ Pi.createPayment ──▶  Pi SDK
+                               │ onReadyForServerApproval(paymentId)
+                               ▼
+                          POST /approve   ──▶ Pi /v2/payments/:id/approve
+                               │ onReadyForServerCompletion(paymentId, txid)
+                               ▼
+                          POST /complete  ──▶ Pi /v2/payments/:id/complete
+                                               + Neon insert (tickets|cards)
+                                               + threshold check → maybe draw
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Idempotency: `complete` looks up `payment_id` in tickets/cards before inserting,
+so SDK retries can't double-mint.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Provably-fair
 
-### `npm run eject`
+- **Tickets:** at draw time we generate a 32-byte seed, then pick the winner via
+  `HMAC-SHA256(seed, sortedTicketIds)`. Both `seed` and `proof_hash` are persisted
+  in `draws` so anyone can verify the result.
+- **Cards:** the seed is committed at purchase time (random 16 bytes) and hidden
+  from the client until the user calls `/scratch-card`. The reward is a deterministic
+  function of that seed.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Next steps
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+See [NEXT_STEPS.md](NEXT_STEPS.md).

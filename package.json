@@ -1,27 +1,32 @@
 {
-  "name": "pi-lottery-app",
-  "version": "0.1.0",
+  "name": "lattopi",
+  "version": "0.2.0",
   "private": true,
   "dependencies": {
     "@lottiefiles/react-lottie-player": "^3.6.0",
-    "@testing-library/dom": "^10.4.0",
-    "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.3.0",
-    "@testing-library/user-event": "^13.5.0",
+    "@neondatabase/serverless": "^0.9.4",
     "lottie-react": "^2.4.1",
-    "mongodb": "^6.17.0",
-    "node-fetch": "^3.3.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.6.2",
     "react-scripts": "5.0.1",
     "web-vitals": "^2.1.4"
   },
+  "devDependencies": {
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^13.5.0",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.39",
+    "tailwindcss": "^3.4.4"
+  },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "db:migrate": "node netlify/functions/_lib/migrate.cjs"
   },
   "eslintConfig": {
     "extends": [

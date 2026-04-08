@@ -1,14 +1,28 @@
-import useAuth from '../hooks/useAuth';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuthCtx } from '../AuthContext';
 
 export default function Home() {
-  const { login } = useAuth();
+  const { login, loading, user } = useAuthCtx();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) navigate('/dashboard', { replace: true });
+  }, [user, navigate]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-700 to-pink-500 flex items-center justify-center px-4 sm:hidden">
-      <div className="bg-white bg-opacity-10 backdrop-blur-md rounded-2xl p-6 w-full max-w-sm text-center shadow-lg">
-        <div className="text-3xl font-extrabold text-white mb-4">🎯 Scratch & Win</div>
-        <button onClick={login} className="w-full py-3 rounded-full text-white bg-pink-600 hover:bg-pink-700 font-semibold shadow-lg">
-          Login with Pi
+    <div className="min-h-[80vh] flex items-center justify-center px-4">
+      <div className="glass p-8 w-full max-w-sm text-center">
+        <div className="text-3xl font-extrabold mb-2">🎯 LattoPi</div>
+        <p className="text-sm opacity-80 mb-6">
+          Lottery & scratch cards on the Pi Network. 75% platform / 25% prize pool.
+        </p>
+        <button
+          onClick={login}
+          disabled={loading}
+          className="btn-primary w-full"
+        >
+          {loading ? 'Connecting…' : 'Login with Pi'}
         </button>
       </div>
     </div>

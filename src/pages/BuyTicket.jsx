@@ -1,54 +1,55 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useAuthCtx } from '../AuthContext';
 import ScratchAnimation from '../components/ScratchAnimation';
 
-export default function BuyTicket({ user }) {
-  const [win, setWin] = useState(null);
-  const [loading, setLoading] = useState(false);
+export default function BuyTicket() {
+  const { user, login, pay } = useAuthCtx();
+  const [count, setCount] = useState(1);
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState(null);
 
-  const handleBuy = async () => {
-    setLoading(true);
-    const response = await fetch('/.netlify/functions/complete', {
-      method: 'POST',
-      body: JSON.stringify({
-        uid: user.uid,
-        username: user.username,
-        paymentId: 'demo', // Replace with real ID
-        txid: 'demo-txid',
-      }),
-    });
-    const data = await response.json();
-    setTimeout(() => {
-      setWin(data.win);
-      setLoading(false);
-    }, 2000); // simulate scratching delay
-  };
+  async function buy() {
+    if (!user) return login();
+    setBusy(true);
+    setMessage(null);
+    try {
+      const result = await pay({
+        amount: count, // 1 π per ticket
+        memo: `LattoPi tickets x${count}`,
+        metadata: { kind: 'tickets', count },
+      });
+      setMessage(
+        result.draw?.triggered
+          ? `Bought ${count} tickets — draw fired! Winner: @${result.draw.winnerUsername}`
+          : `Bought ${count} tickets for draw ${result.tickets?.[0]?.draw_id || ''}`
+      );
+    } catch (e) {
+      setMessage(e.message);
+    } finally {
+      setBusy(false);
+    }
+  }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-4 sm:hidden relative overflow-hidden">
-      <ScratchAnimation visible={loading} />
-
-      <h1 className="text-xl font-bold mb-4">Buy Scratch Ticket 🎫</h1>
-
-      <button
-        onClick={handleBuy}
-        className="w-full py-3 mb-4 rounded-full bg-pink-600 hover:bg-pink-700 text-white font-semibold"
-        disabled={loading}
-      >
-        {loading ? 'Scratching...' : 'Pay 0.5 π and Scratch'}
-      </button>
-
-      {win !== null && (
-        <div className="bg-green-700 p-4 rounded text-center text-xl font-bold animate-bounce">
-          🎉 You won {win} π!
-        </div>
-      )}
-
-      <Link to="/dashboard">
-        <p className="mt-4 text-center text-sm text-pink-400 underline">
-          ← Back to Dashboard
-        </p>
-      </Link>
-    </div>
+    <section className="mt-4 space-y-4 relative">
+      <ScratchAnimation visible={busy} />
+      <div className="glass p-5">
+        <h2 className="font-semibold text-lg">Buy Lottery Tickets 🎫</h2>
+        <p className="text-xs opacity-70 mt-1">1 π per ticket. Numbers auto-generated.</p>
+        <label className="block mt-4 text-xs opacity-70">Number of tickets</label>
+        <input
+          type="number"
+          min="1"
+          max="100"
+          value={count}
+          onChange={(e) => setCount(Math.max(1, Math.min(100, Number(e.target.value) || 1)))}
+          className="w-full mt-1 bg-white/10 border border-white/10 rounded-xl px-4 py-3 text-lg"
+        />
+        <button onClick={buy} disabled={busy} className="btn-primary w-full mt-4">
+          {busy ? 'Processing…' : `Pay ${count} π`}
+        </button>
+        {message && <p className="text-sm mt-3 opacity-90">{message}</p>}
+      </div>
+    </section>
   );
 }
