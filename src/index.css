@@ -2,26 +2,58 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Default = dark. The ThemeProvider toggles `dark` on <html>; light variants
-   live under :root (without .dark) so they're the "no dark class" baseline. */
+/* ──────────────────────────────────────────────────────────
+   THEME TOKENS
+   The ThemeProvider toggles `dark` on <html>. Both themes are
+   driven by CSS variables so .glass, .app-bg and the rest of
+   the components don't need any conditional Tailwind classes.
+
+   Dark   = "Glassmorphism" — deep navy/violet, neon purple/gold
+   Light  = "Pearly White"  — soft slate gradient, frosted white
+   ────────────────────────────────────────────────────────── */
 
 :root {
   color-scheme: light dark;
-  --bg-start: #f5f3ff;
-  --bg-mid:   #faf5ff;
-  --bg-end:   #fff7ed;
-  --fg:       #1e1b3a;
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(15, 10, 31, 0.08);
+
+  /* Pearly white gradient — slate-50 base with subtle warm + cool stops
+     so the page never looks like flat #fff. */
+  --bg-start: #f8fafc; /* slate-50  */
+  --bg-mid:   #eef2ff; /* indigo-50 */
+  --bg-end:   #fef3c7; /* amber-100 */
+
+  --fg:        #0f172a; /* slate-900 */
+  --fg-muted:  #475569; /* slate-600 */
+  --fg-faint:  #64748b; /* slate-500 */
+
+  /* Frosted white glass: very transparent, heavy blur, hairline border */
+  --glass-bg:     rgba(255, 255, 255, 0.55);
+  --glass-bg-hi:  rgba(255, 255, 255, 0.78); /* hover / emphasis */
+  --glass-border: rgba(15, 23, 42, 0.08);
+  --glass-shadow: 0 20px 50px -20px rgba(15, 23, 42, 0.18);
+
+  /* Subtle slate-tinted "fill" used to replace bg-white/X in light mode */
+  --fill-soft:    rgba(15, 23, 42, 0.04);
+  --fill-medium:  rgba(15, 23, 42, 0.07);
+  --fill-strong:  rgba(15, 23, 42, 0.10);
 }
 
 html.dark {
-  --bg-start: #020617; /* slate-950 */
+  --bg-start: #020617; /* slate-950  */
   --bg-mid:   #2e1065; /* purple-950 */
   --bg-end:   #020617;
-  --fg:       #ffffff;
-  --glass-bg: rgba(255, 255, 255, 0.05);
+
+  --fg:        #ffffff;
+  --fg-muted:  rgba(255, 255, 255, 0.75);
+  --fg-faint:  rgba(255, 255, 255, 0.55);
+
+  --glass-bg:     rgba(255, 255, 255, 0.05);
+  --glass-bg-hi:  rgba(255, 255, 255, 0.10);
   --glass-border: rgba(255, 255, 255, 0.10);
+  --glass-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+
+  --fill-soft:    rgba(255, 255, 255, 0.05);
+  --fill-medium:  rgba(255, 255, 255, 0.10);
+  --fill-strong:  rgba(255, 255, 255, 0.15);
 }
 
 body {
@@ -33,16 +65,26 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background: var(--bg-start);
   color: var(--fg);
+  letter-spacing: -0.005em; /* tight, modern */
 }
 
+/* ──────────────────────────────────────────────────────────
+   COMPONENTS
+   ────────────────────────────────────────────────────────── */
+
 @layer components {
-  /* Themed glass card — uses CSS vars so dark/light both work without
-     touching the JSX. */
+  /* Themed frosted glass card. Uses CSS variables so dark/light flips
+     without changing any JSX. */
   .glass {
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
-    @apply backdrop-blur-md rounded-2xl shadow-xl;
+    box-shadow: var(--glass-shadow);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+    backdrop-filter: blur(16px) saturate(160%);
+    @apply rounded-2xl;
   }
+  .glass-hi { background: var(--glass-bg-hi); }
+
   .btn-primary {
     @apply bg-pi-purple hover:bg-purple-600 text-white font-semibold px-5 py-3 rounded-xl transition disabled:opacity-50;
   }
@@ -54,14 +96,53 @@ body {
   .chip {
     @apply text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full;
   }
-  /* App-wide gradient backdrop driven by CSS vars so it adapts to theme. */
+
+  /* App-wide gradient backdrop. Light mode uses a tri-stop pearl gradient
+     so it never looks flat; dark mode uses the original deep-violet wash. */
   .app-bg {
-    background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-mid) 50%, var(--bg-end) 100%);
+    background:
+      radial-gradient(1200px 600px at 80% -10%, var(--bg-end) 0%, transparent 60%),
+      radial-gradient(1000px 600px at -10% 110%, var(--bg-mid) 0%, transparent 55%),
+      linear-gradient(160deg, var(--bg-start) 0%, var(--bg-mid) 50%, var(--bg-start) 100%);
     color: var(--fg);
+    min-height: 100vh;
   }
 }
 
-/* ── Animations ───────────────────────────────────────── */
+/* ──────────────────────────────────────────────────────────
+   LIGHT-MODE UTILITY OVERRIDES
+   The components were originally built dark-only with hardcoded
+   `text-white` / `bg-white/10` / `border-white/10`. Rather than
+   touching every component, we override those utilities globally
+   when we're NOT in dark mode.
+   ────────────────────────────────────────────────────────── */
+
+html:not(.dark) {
+  /* Text — anything explicitly white becomes deep slate */
+  .text-white { color: var(--fg) !important; }
+
+  /* Surface fills — Tailwind /10 /5 /20 etc. */
+  .bg-white\/5    { background-color: var(--fill-soft)   !important; }
+  .bg-white\/10   { background-color: var(--fill-medium) !important; }
+  .bg-white\/20   { background-color: var(--fill-strong) !important; }
+
+  .border-white\/5,
+  .border-white\/10,
+  .border-white\/20 { border-color: var(--glass-border) !important; }
+
+  /* Opacity helpers — 70/80 muted text reads as fg-muted */
+  .opacity-60, .opacity-70, .opacity-80, .opacity-90 { /* leave alone */ }
+
+  /* Bottom nav and headers that lived on dark gradients */
+  .from-slate-950, .via-purple-950, .to-slate-950 { /* still ok inside .app-bg gradient */ }
+
+  /* Fix the testnet banner contrast in light mode */
+  .bg-amber-500\/90 { color: #1e293b; }
+}
+
+/* ──────────────────────────────────────────────────────────
+   ANIMATIONS
+   ────────────────────────────────────────────────────────── */
 
 @keyframes shimmer {
   0%   { background-position: -200% 0; }

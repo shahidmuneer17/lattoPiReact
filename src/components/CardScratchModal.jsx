@@ -11,10 +11,18 @@
 // is slow.
 import { useEffect, useRef, useState } from 'react';
 import api from '../api';
+import { useTheme } from '../ThemeContext';
 
 const SCRATCH_MS = 2500;
 
+// Theme-aware scratch foil. Dark = gold→silver, Light = rose-gold→pearl.
+const FOIL = {
+  dark:  { c1: '#f5c518', c2: '#fff8c2', c3: '#c0c0c0', label: 'rgba(0,0,0,0.45)' },
+  light: { c1: '#f5c5b8', c2: '#ffffff', c3: '#e8d4c8', label: 'rgba(60,30,40,0.55)' },
+};
+
 export default function CardScratchModal({ card, onClose, onResolved }) {
+  const { isDark } = useTheme();
   const [phase, setPhase] = useState(card.status === 'scratched' ? 'result' : 'ready');
   const [reward, setReward] = useState(card.reward_pi);
   const [error, setError] = useState(null);
@@ -34,14 +42,17 @@ export default function CardScratchModal({ card, onClose, onResolved }) {
     const ctx = c.getContext('2d');
     c.width = c.offsetWidth;
     c.height = c.offsetHeight;
-    // Gold cover
+    // Theme-adaptive foil:
+    //   Dark  → Gold → Pearl White → Silver
+    //   Light → Rose Gold → Pearl White → Champagne
+    const foil = isDark ? FOIL.dark : FOIL.light;
     const grad = ctx.createLinearGradient(0, 0, c.width, c.height);
-    grad.addColorStop(0, '#f5c518');
-    grad.addColorStop(0.5, '#fff8c2');
-    grad.addColorStop(1, '#f5c518');
+    grad.addColorStop(0,    foil.c1);
+    grad.addColorStop(0.5,  foil.c2);
+    grad.addColorStop(1,    foil.c3);
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, c.width, c.height);
-    ctx.fillStyle = 'rgba(0,0,0,0.4)';
+    ctx.fillStyle = foil.label;
     ctx.font = 'bold 22px sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText('SCRATCHING…', c.width / 2, c.height / 2 + 8);
@@ -65,7 +76,7 @@ export default function CardScratchModal({ card, onClose, onResolved }) {
     }
     raf = requestAnimationFrame(frame);
     return () => cancelAnimationFrame(raf);
-  }, [phase]);
+  }, [phase, isDark]);
 
   async function startScratch() {
     if (phase !== 'ready') return;
@@ -105,15 +116,27 @@ export default function CardScratchModal({ card, onClose, onResolved }) {
           ×
         </button>
 
-        {/* Card body */}
-        <div className="rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-purple-700 via-fuchsia-700 to-amber-500 animate-gradient">
+        {/* Card body — gradient differs slightly per theme so the bezels match */}
+        <div
+          className={`rounded-3xl overflow-hidden shadow-2xl animate-gradient bg-gradient-to-br ${
+            isDark
+              ? 'from-purple-700 via-fuchsia-700 to-amber-500'
+              : 'from-rose-200 via-fuchsia-200 to-amber-200'
+          }`}
+        >
           <div className="p-5 text-center">
-            <p className="chip bg-black/30 inline-block mb-2">⚡ Scratch Card</p>
-            <p className="text-[10px] opacity-70 font-mono">#{card.card_id.slice(0, 8)}</p>
+            <p className="chip bg-black/30 text-white inline-block mb-2">⚡ Scratch Card</p>
+            <p className="text-[10px] opacity-70 font-mono text-white/90">#{card.card_id.slice(0, 8)}</p>
           </div>
 
           {/* Reveal area */}
-          <div className="mx-5 mb-5 aspect-[4/3] rounded-2xl bg-gradient-to-br from-slate-900 to-purple-900 border border-white/20 relative overflow-hidden">
+          <div
+            className={`mx-5 mb-5 aspect-[4/3] rounded-2xl border relative overflow-hidden ${
+              isDark
+                ? 'bg-gradient-to-br from-slate-900 to-purple-900 border-white/20 text-white'
+                : 'bg-gradient-to-br from-slate-50 to-rose-50 border-rose-200 text-slate-900'
+            }`}
+          >
             {/* The reveal underneath the scratch cover */}
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
               {phase === 'ready' && (
